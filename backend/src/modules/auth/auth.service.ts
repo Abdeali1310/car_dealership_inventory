@@ -59,3 +59,10 @@ export async function loginUser(email: string, password: string): Promise<any> {
     user: userWithoutPassword,
   };
 }
+
+export async function getUserById(id: string): Promise<any> {
+  const user = await prisma.user.findUnique({
+    where: { id },
+  });
+  return user;
+}
