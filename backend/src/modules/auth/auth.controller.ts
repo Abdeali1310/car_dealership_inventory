@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { registerUser } from "./auth.service";
+import { registerUser, loginUser } from "./auth.service";
 
 export async function register(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -18,6 +18,29 @@ export async function register(req: Request, res: Response, next: NextFunction):
   } catch (error: any) {
     if (error.message === "Email already registered") {
       res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+      return;
+    }
+    next(error);
+  }
+}
+
+export async function login(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { email, password } = req.body;
+    
+    const result = await loginUser(email, password);
+    
+    res.status(200).json({
+      success: true,
+      message: "Login successful",
+      data: result,
+    });
+  } catch (error: any) {
+    if (error.message === "Invalid credentials") {
+      res.status(401).json({
         success: false,
         message: error.message,
       });
