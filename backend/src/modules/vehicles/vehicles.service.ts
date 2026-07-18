@@ -105,5 +105,18 @@ export async function updateVehicle(id: string, data: Partial<CreateVehicleInput
 }
 
 export async function deleteVehicle(id: string): Promise<any> {
-  throw new Error("Not implemented");
+  // Check first with findUnique to explicitly throw a clear 404 ApiError if the record doesn't exist.
+  const existingVehicle = await prisma.vehicle.findUnique({
+    where: { id },
+  });
+
+  if (!existingVehicle) {
+    throw new ApiError(404, "Vehicle not found");
+  }
+
+  const deletedVehicle = await prisma.vehicle.delete({
+    where: { id },
+  });
+
+  return deletedVehicle;
 }

@@ -306,3 +306,82 @@ describe("PUT /api/vehicles/:id", () => {
     expect(res.body.message).toBe("Validation failed");
   });
 });
+
+describe("DELETE /api/vehicles/:id", () => {
+  let adminToken: string;
+  let customerToken: string;
+  let vehicleId: string;
+
+  beforeEach(async () => {
+    adminToken = signToken({
+      id: "admin-id-123",
+      sub: "admin-id-123",
+      email: "admin_test@example.com",
+      role: "ADMIN",
+    });
+
+    customerToken = signToken({
+      id: "customer-id-123",
+      sub: "customer-id-123",
+      email: "customer_test@example.com",
+      role: "CUSTOMER",
+    });
+
+    // Seed a vehicle
+    const vehicle = await prisma.vehicle.create({
+      data: {
+        make: "Ford",
+        model: "Mustang",
+        category: "COUPE",
+        price: 55000.00,
+        quantity: 2,
+      },
+    });
+    vehicleId = vehicle.id;
+  });
+
+  it("should allow an ADMIN to delete a vehicle successfully and return 200", async () => {
+    const res = await request(app)
+      .delete(`/api/vehicles/${vehicleId}`)
+      .set("Authorization", `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.message).toBe("Vehicle deleted successfully");
+
+    // Verify it is gone from the database
+    const dbVehicle = await prisma.vehicle.findUnique({
+      where: { id: vehicleId },
+    });
+    expect(dbVehicle).toBeNull();
+  });
+
+  it("should deny access with 403 Forbidden when user is a CUSTOMER", async () => {
+    const res = await request(app)
+      .delete(`/api/vehicles/${vehicleId}`)
+      .set("Authorization", `Bearer ${customerToken}`);
+
+    expect(res.status).toBe(403);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("Forbidden: Access denied");
+  });
+
+  it("should deny access with 401 Unauthorized when no token is provided", async () => {
+    const res = await request(app)
+      .delete(`/api/vehicles/${vehicleId}`);
+
+    expect(res.status).toBe(401);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("No token provided");
+  });
+
+  it("should return 404 Not Found if the vehicle to delete does not exist", async () => {
+    const res = await request(app)
+      .delete("/api/vehicles/non-existent-id")
+      .set("Authorization", `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(404);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("Vehicle not found");
+  });
+});
