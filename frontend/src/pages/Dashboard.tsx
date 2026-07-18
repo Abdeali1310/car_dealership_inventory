@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "../api/axios";
 import VehicleTable, { type Vehicle } from "../components/vehicles/VehicleTable";
 import SearchFilterBar, { type FilterState } from "../components/vehicles/SearchFilterBar";
+import ConfirmDialog from "../components/shared/ConfirmDialog";
 import { toast } from "sonner";
 import { Car } from "lucide-react";
 
 const Dashboard: React.FC = () => {
-  const [purchasingId, setPurchasingId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const [vehicleToPurchase, setVehicleToPurchase] = useState<Vehicle | null>(null);
+  const [isPurchasing, setIsPurchasing] = useState(false);
 
   const [filters, setFilters] = useState<FilterState>({
     make: "",
@@ -29,7 +32,7 @@ const Dashboard: React.FC = () => {
     };
   }, [filters]);
 
-  const { data: vehicles, isLoading, refetch } = useQuery<Vehicle[]>({
+  const { data: vehicles, isLoading } = useQuery<Vehicle[]>({
     queryKey: ["vehicles", debouncedFilters],
     queryFn: async () => {
       const params: Record<string, string | number> = {};
@@ -44,19 +47,39 @@ const Dashboard: React.FC = () => {
     },
   });
 
-  const handlePurchase = async (vehicleId: string) => {
-    setPurchasingId(vehicleId);
+  const handlePurchaseClick = (vehicleId: string) => {
+    const vehicle = vehicles?.find((v) => v.id === vehicleId);
+    if (vehicle) {
+      setVehicleToPurchase(vehicle);
+    }
+  };
+
+  const handleConfirmPurchase = async () => {
+    if (!vehicleToPurchase) return;
+    setIsPurchasing(true);
     try {
-      await api.post(`/vehicles/${vehicleId}/purchase`);
-      toast.success("Vehicle purchased successfully!");
-      refetch();
+      await api.post(`/vehicles/${vehicleToPurchase.id}/purchase`);
+      toast.success(`Successfully purchased ${vehicleToPurchase.make} ${vehicleToPurchase.model}!`);
+      setVehicleToPurchase(null);
+      // Invalidate queries to refresh list & update stocks
+      queryClient.invalidateQueries({ queryKey: ["vehicles"] });
     } catch (error: any) {
       console.error("Purchase error:", error);
       const msg = error.response?.data?.message || "Purchase failed.";
       toast.error(msg);
+      setVehicleToPurchase(null);
+      queryClient.invalidateQueries({ queryKey: ["vehicles"] });
     } finally {
-      setPurchasingId(null);
+      setIsPurchasing(false);
     }
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(amount);
   };
 
   const hasVehicles = vehicles && vehicles.length > 0;
@@ -100,10 +123,32 @@ const Dashboard: React.FC = () => {
       ) : (
         <VehicleTable
           vehicles={vehicles}
-          onPurchase={handlePurchase}
-          purchasingId={purchasingId}
+          onPurchase={handlePurchaseClick}
+          purchasingId={vehicleToPurchase?.id || null}
         />
       )}
+
+      {/* Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={vehicleToPurchase !== null}
+        title="Confirm Purchase"
+        description={
+          vehicleToPurchase ? (
+            <span>
+              Buy this <strong>{vehicleToPurchase.make} {vehicleToPurchase.model}</strong> for{" "}
+              <strong>{formatCurrency(Number(vehicleToPurchase.price))}</strong>?
+            </span>
+          ) : (
+            ""
+          )
+        }
+        confirmLabel="Purchase"
+        cancelLabel="Cancel"
+        onConfirm={handleConfirmPurchase}
+        onCancel={() => setVehicleToPurchase(null)}
+        isProcessing={isPurchasing}
+        variant="brand"
+      />
     </div>
   );
 };
