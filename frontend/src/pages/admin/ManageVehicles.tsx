@@ -4,17 +4,23 @@ import api from "../../api/axios";
 import VehicleTable, { type Vehicle } from "../../components/vehicles/VehicleTable";
 import ConfirmDialog from "../../components/shared/ConfirmDialog";
 import VehicleForm from "../../components/vehicles/VehicleForm";
+import RestockDialog from "../../components/vehicles/RestockDialog";
 import { toast } from "sonner";
 import { Plus, Settings } from "lucide-react";
 
 const ManageVehicles: React.FC = () => {
   const queryClient = useQueryClient();
+  
+  // Delete dialog state
   const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Form Modal state
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedVehicleForEdit, setSelectedVehicleForEdit] = useState<Vehicle | null>(null);
+
+  // Restock dialog state
+  const [vehicleToRestock, setVehicleToRestock] = useState<Vehicle | null>(null);
 
   // Fetch all vehicles
   const { data: vehicles, isLoading } = useQuery<Vehicle[]>({
@@ -54,6 +60,10 @@ const ManageVehicles: React.FC = () => {
   const handleAddClick = () => {
     setSelectedVehicleForEdit(null);
     setIsFormOpen(true);
+  };
+
+  const handleRestockClick = (vehicle: Vehicle) => {
+    setVehicleToRestock(vehicle);
   };
 
   const handleFormSuccess = () => {
@@ -114,6 +124,7 @@ const ManageVehicles: React.FC = () => {
           vehicles={vehicles}
           onEdit={handleEditClick}
           onDelete={handleDeleteClick}
+          onRestock={handleRestockClick}
           deletingId={vehicleToDelete?.id || null}
         />
       )}
@@ -147,6 +158,16 @@ const ManageVehicles: React.FC = () => {
             setIsFormOpen(false);
             setSelectedVehicleForEdit(null);
           }}
+          onSuccess={handleFormSuccess}
+        />
+      )}
+
+      {/* Restock Dialog Modal */}
+      {vehicleToRestock && (
+        <RestockDialog
+          isOpen={vehicleToRestock !== null}
+          vehicle={vehicleToRestock}
+          onClose={() => setVehicleToRestock(null)}
           onSuccess={handleFormSuccess}
         />
       )}

@@ -22,6 +22,7 @@ interface VehicleTableProps {
   onEdit?: (vehicle: Vehicle) => void;
   onDelete?: (vehicle: Vehicle) => void;
   deletingId?: string | null;
+  onRestock?: (vehicle: Vehicle) => void;
 }
 
 const VehicleTable: React.FC<VehicleTableProps> = ({
@@ -31,6 +32,7 @@ const VehicleTable: React.FC<VehicleTableProps> = ({
   onEdit,
   onDelete,
   deletingId = null,
+  onRestock,
 }) => {
   const { user } = useAuth();
 
@@ -62,7 +64,7 @@ const VehicleTable: React.FC<VehicleTableProps> = ({
             <th className="py-2.5 px-3.5 text-[12px] font-medium text-text-secondary uppercase tracking-[0.02em] w-[140px]">
               Status
             </th>
-            <th className="py-2.5 px-3.5 text-[12px] font-medium text-text-secondary uppercase tracking-[0.02em] text-right w-[180px]">
+            <th className="py-2.5 px-3.5 text-[12px] font-medium text-text-secondary uppercase tracking-[0.02em] text-right w-[240px]">
               Actions
             </th>
           </tr>
@@ -116,6 +118,15 @@ const VehicleTable: React.FC<VehicleTableProps> = ({
                   )}
                   {user?.role === "ADMIN" && (
                     <div className="flex justify-end gap-2">
+                      {onRestock && (
+                        <button
+                          type="button"
+                          onClick={() => onRestock(vehicle)}
+                          className="h-[32px] px-3 rounded-standard border border-border-strong text-text-secondary hover:text-brand hover:border-brand hover:bg-bg-hover text-[12px] font-medium transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
+                        >
+                          Restock
+                        </button>
+                      )}
                       {onEdit && (
                         <button
                           type="button"
@@ -139,7 +150,7 @@ const VehicleTable: React.FC<VehicleTableProps> = ({
                           )}
                         </button>
                       )}
-                      {!onEdit && !onDelete && (
+                      {!onEdit && !onDelete && !onRestock && (
                         <span className="text-[12px] text-text-secondary italic pr-2">
                           Admin View
                         </span>
