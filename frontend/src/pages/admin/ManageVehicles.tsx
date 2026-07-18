@@ -6,7 +6,7 @@ import ConfirmDialog from "../../components/shared/ConfirmDialog";
 import VehicleForm from "../../components/vehicles/VehicleForm";
 import RestockDialog from "../../components/vehicles/RestockDialog";
 import { toast } from "sonner";
-import { Plus, Settings } from "lucide-react";
+import { Plus, Settings, AlertTriangle } from "lucide-react";
 
 const ManageVehicles: React.FC = () => {
   const queryClient = useQueryClient();
@@ -23,7 +23,7 @@ const ManageVehicles: React.FC = () => {
   const [vehicleToRestock, setVehicleToRestock] = useState<Vehicle | null>(null);
 
   // Fetch all vehicles
-  const { data: vehicles, isLoading } = useQuery<Vehicle[]>({
+  const { data: vehicles, isLoading, isError, refetch } = useQuery<Vehicle[]>({
     queryKey: ["vehicles"],
     queryFn: async () => {
       const response = await api.get("/vehicles");
@@ -111,6 +111,23 @@ const ManageVehicles: React.FC = () => {
               </div>
             ))}
           </div>
+        </div>
+      ) : isError ? (
+        <div className="border border-status-critical/20 rounded-standard p-12 bg-bg-primary flex flex-col items-center justify-center text-center gap-3">
+          <div className="w-12 h-12 rounded-pill bg-[#fef2f2] flex items-center justify-center">
+            <AlertTriangle className="w-6 h-6 text-status-critical" />
+          </div>
+          <h2 className="text-[16px] font-semibold text-text-primary">Failed to Load Inventory</h2>
+          <p className="text-[14px] text-text-secondary max-w-[400px]">
+            Could not fetch the vehicle catalog. Please verify your connection or admin permissions.
+          </p>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="h-[38px] px-5 bg-brand hover:bg-brand-hover text-white rounded-standard text-[13px] font-medium transition-all cursor-pointer mt-2"
+          >
+            Retry Connection
+          </button>
         </div>
       ) : !hasVehicles ? (
         <div className="border border-border rounded-standard p-12 bg-bg-primary flex flex-col items-center justify-center text-center gap-3">

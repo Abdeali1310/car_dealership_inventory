@@ -5,7 +5,7 @@ import VehicleTable, { type Vehicle } from "../components/vehicles/VehicleTable"
 import SearchFilterBar, { type FilterState } from "../components/vehicles/SearchFilterBar";
 import ConfirmDialog from "../components/shared/ConfirmDialog";
 import { toast } from "sonner";
-import { Car } from "lucide-react";
+import { Car, AlertTriangle } from "lucide-react";
 
 const Dashboard: React.FC = () => {
   const queryClient = useQueryClient();
@@ -32,7 +32,7 @@ const Dashboard: React.FC = () => {
     };
   }, [filters]);
 
-  const { data: vehicles, isLoading } = useQuery<Vehicle[]>({
+  const { data: vehicles, isLoading, isError, refetch } = useQuery<Vehicle[]>({
     queryKey: ["vehicles", debouncedFilters],
     queryFn: async () => {
       const params: Record<string, string | number> = {};
@@ -61,7 +61,6 @@ const Dashboard: React.FC = () => {
       await api.post(`/vehicles/${vehicleToPurchase.id}/purchase`);
       toast.success(`Successfully purchased ${vehicleToPurchase.make} ${vehicleToPurchase.model}!`);
       setVehicleToPurchase(null);
-      // Invalidate queries to refresh list & update stocks
       queryClient.invalidateQueries({ queryKey: ["vehicles"] });
     } catch (error: any) {
       console.error("Purchase error:", error);
@@ -109,6 +108,23 @@ const Dashboard: React.FC = () => {
               </div>
             ))}
           </div>
+        </div>
+      ) : isError ? (
+        <div className="border border-status-critical/20 rounded-standard p-12 bg-bg-primary flex flex-col items-center justify-center text-center gap-3">
+          <div className="w-12 h-12 rounded-pill bg-[#fef2f2] flex items-center justify-center">
+            <AlertTriangle className="w-6 h-6 text-status-critical" />
+          </div>
+          <h2 className="text-[16px] font-semibold text-text-primary">Failed to Load Inventory</h2>
+          <p className="text-[14px] text-text-secondary max-w-[400px]">
+            There was an error communicating with the server. Please check your network connection and try again.
+          </p>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="h-[38px] px-5 bg-brand hover:bg-brand-hover text-white rounded-standard text-[13px] font-medium transition-all cursor-pointer mt-2"
+          >
+            Retry Connection
+          </button>
         </div>
       ) : !hasVehicles ? (
         <div className="border border-border rounded-standard p-12 bg-bg-primary flex flex-col items-center justify-center text-center gap-3">
