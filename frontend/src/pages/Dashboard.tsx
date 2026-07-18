@@ -1,17 +1,45 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import api from "../api/axios";
 import VehicleTable, { type Vehicle } from "../components/vehicles/VehicleTable";
+import SearchFilterBar, { type FilterState } from "../components/vehicles/SearchFilterBar";
 import { toast } from "sonner";
 import { Car } from "lucide-react";
 
 const Dashboard: React.FC = () => {
   const [purchasingId, setPurchasingId] = useState<string | null>(null);
 
+  const [filters, setFilters] = useState<FilterState>({
+    make: "",
+    model: "",
+    category: "",
+    minPrice: "",
+    maxPrice: "",
+  });
+
+  const [debouncedFilters, setDebouncedFilters] = useState<FilterState>(filters);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedFilters(filters);
+    }, 300);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [filters]);
+
   const { data: vehicles, isLoading, refetch } = useQuery<Vehicle[]>({
-    queryKey: ["vehicles"],
+    queryKey: ["vehicles", debouncedFilters],
     queryFn: async () => {
-      const response = await api.get("/vehicles");
+      const params: Record<string, string | number> = {};
+      if (debouncedFilters.make) params.make = debouncedFilters.make;
+      if (debouncedFilters.model) params.model = debouncedFilters.model;
+      if (debouncedFilters.category) params.category = debouncedFilters.category;
+      if (debouncedFilters.minPrice) params.minPrice = Number(debouncedFilters.minPrice);
+      if (debouncedFilters.maxPrice) params.maxPrice = Number(debouncedFilters.maxPrice);
+
+      const response = await api.get("/vehicles/search", { params });
       return response.data.data;
     },
   });
@@ -31,16 +59,19 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="p-6 font-sans flex flex-col gap-4">
-        <div className="flex justify-between items-center mb-2">
-          <div>
-            <h1 className="text-[22px] font-semibold text-text-primary">Vehicles Inventory</h1>
-            <p className="text-[12px] text-text-secondary mt-1">Browse and purchase vehicles</p>
-          </div>
-        </div>
-        {/* Table skeleton */}
+  const hasVehicles = vehicles && vehicles.length > 0;
+
+  return (
+    <div className="p-6 font-sans flex flex-col gap-6">
+      <div>
+        <h1 className="text-[22px] font-semibold text-text-primary">Vehicles Inventory</h1>
+        <p className="text-[12px] text-text-secondary mt-1">Browse and purchase vehicles</p>
+      </div>
+
+      <SearchFilterBar filters={filters} onChange={setFilters} />
+
+      {isLoading ? (
+        /* Table skeleton */
         <div className="w-full border border-border rounded-standard bg-bg-primary overflow-hidden animate-pulse">
           <div className="h-[40px] bg-bg-secondary border-b border-border" />
           <div className="flex flex-col">
@@ -56,27 +87,14 @@ const Dashboard: React.FC = () => {
             ))}
           </div>
         </div>
-      </div>
-    );
-  }
-
-  const hasVehicles = vehicles && vehicles.length > 0;
-
-  return (
-    <div className="p-6 font-sans flex flex-col gap-6">
-      <div>
-        <h1 className="text-[22px] font-semibold text-text-primary">Vehicles Inventory</h1>
-        <p className="text-[12px] text-text-secondary mt-1">Browse and purchase vehicles</p>
-      </div>
-
-      {!hasVehicles ? (
+      ) : !hasVehicles ? (
         <div className="border border-border rounded-standard p-12 bg-bg-primary flex flex-col items-center justify-center text-center gap-3">
           <div className="w-12 h-12 rounded-pill bg-bg-secondary flex items-center justify-center">
             <Car className="w-6 h-6 text-text-secondary" />
           </div>
-          <h2 className="text-[16px] font-semibold text-text-primary">No Vehicles Available</h2>
+          <h2 className="text-[16px] font-semibold text-text-primary">No Vehicles Found</h2>
           <p className="text-[14px] text-text-secondary max-w-[400px]">
-            There are currently no vehicles registered in the dealership inventory. Please check back later.
+            No vehicles match your current search and filter criteria. Try adjusting your filters.
           </p>
         </div>
       ) : (
