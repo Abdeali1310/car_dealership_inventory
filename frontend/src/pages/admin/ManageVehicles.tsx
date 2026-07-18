@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "../../api/axios";
 import VehicleTable, { type Vehicle } from "../../components/vehicles/VehicleTable";
 import ConfirmDialog from "../../components/shared/ConfirmDialog";
+import VehicleForm from "../../components/vehicles/VehicleForm";
 import { toast } from "sonner";
 import { Plus, Settings } from "lucide-react";
 
@@ -10,6 +11,10 @@ const ManageVehicles: React.FC = () => {
   const queryClient = useQueryClient();
   const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Form Modal state
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedVehicleForEdit, setSelectedVehicleForEdit] = useState<Vehicle | null>(null);
 
   // Fetch all vehicles
   const { data: vehicles, isLoading } = useQuery<Vehicle[]>({
@@ -42,11 +47,17 @@ const ManageVehicles: React.FC = () => {
   };
 
   const handleEditClick = (vehicle: Vehicle) => {
-    toast.info(`Edit mode for ${vehicle.make} ${vehicle.model} (will be implemented in Task 8.2)`);
+    setSelectedVehicleForEdit(vehicle);
+    setIsFormOpen(true);
   };
 
   const handleAddClick = () => {
-    toast.info("Add Vehicle form (will be implemented in Task 8.2)");
+    setSelectedVehicleForEdit(null);
+    setIsFormOpen(true);
+  };
+
+  const handleFormSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ["vehicles"] });
   };
 
   const hasVehicles = vehicles && vehicles.length > 0;
@@ -127,6 +138,18 @@ const ManageVehicles: React.FC = () => {
         isProcessing={isDeleting}
         variant="critical"
       />
+
+      {/* Add / Edit Form Modal */}
+      {isFormOpen && (
+        <VehicleForm
+          initialData={selectedVehicleForEdit}
+          onClose={() => {
+            setIsFormOpen(false);
+            setSelectedVehicleForEdit(null);
+          }}
+          onSuccess={handleFormSuccess}
+        />
+      )}
     </div>
   );
 };

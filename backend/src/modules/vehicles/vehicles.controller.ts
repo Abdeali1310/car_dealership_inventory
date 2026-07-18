@@ -129,3 +129,20 @@ export async function restock(req: Request, res: Response, next: NextFunction): 
     next(error);
   }
 }
+
+export async function uploadImage(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    if (!req.file) {
+      throw new ApiError(400, "No file uploaded");
+    }
+    const relativeUrl = `/uploads/${req.file.filename}`;
+    res.status(200).json({
+      success: true,
+      data: {
+        url: relativeUrl,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+}

@@ -8,7 +8,7 @@ export const CreateVehicleDto = z.object({
   price: z.number().positive("Price must be a positive number"),
   quantity: z.number().int().nonnegative("Quantity must be a non-negative integer"),
   description: z.string().optional(),
-  imageUrl: z.string().url("Invalid image URL").optional().or(z.literal("")),
+  imageUrl: z.string().optional().or(z.literal("")),
 });
 
 export type CreateVehicleInput = z.infer<typeof CreateVehicleDto>;
