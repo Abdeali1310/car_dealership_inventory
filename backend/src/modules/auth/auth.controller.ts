@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { registerUser, loginUser, getUserById } from "./auth.service";
+import { ApiError } from "../../utils/ApiError";
 
 export async function register(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -15,14 +16,7 @@ export async function register(req: Request, res: Response, next: NextFunction):
       message: "User registered successfully",
       data: userWithoutPassword,
     });
-  } catch (error: any) {
-    if (error.message === "Email already registered") {
-      res.status(400).json({
-        success: false,
-        message: error.message,
-      });
-      return;
-    }
+  } catch (error) {
     next(error);
   }
 }
@@ -38,14 +32,7 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
       message: "Login successful",
       data: result,
     });
-  } catch (error: any) {
-    if (error.message === "Invalid credentials") {
-      res.status(401).json({
-        success: false,
-        message: error.message,
-      });
-      return;
-    }
+  } catch (error) {
     next(error);
   }
 }
@@ -53,11 +40,7 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
 export async function me(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     if (!req.user) {
-      res.status(401).json({
-        success: false,
-        message: "Unauthorized",
-      });
-      return;
+      throw new ApiError(401, "Unauthorized");
     }
 
     // Support both sub and id
@@ -65,11 +48,7 @@ export async function me(req: Request, res: Response, next: NextFunction): Promi
     const user = await getUserById(userId);
 
     if (!user) {
-      res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-      return;
+      throw new ApiError(404, "User not found");
     }
 
     // Exclude password from response
