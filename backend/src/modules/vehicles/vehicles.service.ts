@@ -25,3 +25,7 @@ export async function createVehicle(data: CreateVehicleInput): Promise<any> {
   });
   return vehicle;
 }
+
+export async function getAllVehicles(): Promise<any[]> {
+  throw new Error("Not implemented");
+}

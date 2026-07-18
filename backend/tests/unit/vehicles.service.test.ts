@@ -1,4 +1,4 @@
-import { createVehicle } from "../../src/modules/vehicles/vehicles.service";
+import { createVehicle, getAllVehicles } from "../../src/modules/vehicles/vehicles.service";
 import prisma from "../../src/lib/prisma";
 
 describe("vehicles.service.ts - createVehicle", () => {
@@ -31,5 +31,36 @@ describe("vehicles.service.ts - createVehicle", () => {
     });
     expect(dbVehicle).toBeDefined();
     expect(dbVehicle?.make).toBe("Toyota");
+  });
+});
+
+describe("vehicles.service.ts - getAllVehicles", () => {
+  it("should return an array of all vehicles in the database", async () => {
+    // Seed some vehicles
+    await createVehicle({
+      make: "Honda",
+      model: "Civic",
+      category: "SEDAN" as const,
+      price: 22000.00,
+      quantity: 10,
+    });
+
+    await createVehicle({
+      make: "Ford",
+      model: "F-150",
+      category: "TRUCK" as const,
+      price: 35000.00,
+      quantity: 2,
+    });
+
+    const vehicles = await getAllVehicles();
+
+    expect(vehicles).toBeDefined();
+    expect(Array.isArray(vehicles)).toBe(true);
+    expect(vehicles.length).toBe(2);
+
+    const makes = vehicles.map(v => v.make);
+    expect(makes).toContain("Honda");
+    expect(makes).toContain("Ford");
   });
 });
