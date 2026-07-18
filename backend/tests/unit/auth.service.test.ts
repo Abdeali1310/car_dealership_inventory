@@ -1,4 +1,4 @@
-import { registerUser } from "../../src/modules/auth/auth.service";
+import { registerUser, loginUser } from "../../src/modules/auth/auth.service";
 import prisma from "../../src/lib/prisma";
 
 describe("auth.service.ts - registerUser", () => {
@@ -31,5 +31,29 @@ describe("auth.service.ts - registerUser", () => {
     await expect(
       registerUser("dup@example.com", "pass2", "Another User")
     ).rejects.toThrow("Email already registered");
+  });
+});
+
+describe("auth.service.ts - loginUser", () => {
+  beforeEach(async () => {
+    // Register a user to log in with
+    await registerUser("login_test@example.com", "correctPassword123", "Login Test User");
+  });
+
+  it("should return a JWT token + the user object when the password is correct", async () => {
+    const result = await loginUser("login_test@example.com", "correctPassword123");
+    
+    expect(result).toBeDefined();
+    expect(result.token).toBeDefined();
+    expect(typeof result.token).toBe("string");
+    expect(result.user).toBeDefined();
+    expect(result.user.email).toBe("login_test@example.com");
+    expect(result.user.password).toBeUndefined();
+  });
+
+  it("should throw an error when the password is wrong", async () => {
+    await expect(
+      loginUser("login_test@example.com", "wrongPassword")
+    ).rejects.toThrow("Invalid credentials");
   });
 });

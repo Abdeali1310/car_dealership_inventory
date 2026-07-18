@@ -26,3 +26,7 @@ export async function registerUser(email: string, password: string, fullName: st
 
   return user;
 }
+
+export async function loginUser(email: string, password: string): Promise<any> {
+  throw new Error("Not implemented");
+}
