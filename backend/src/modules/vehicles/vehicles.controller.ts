@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { createVehicle, getAllVehicles, searchVehicles, updateVehicle, deleteVehicle } from "./vehicles.service";
-import { purchaseVehicle } from "../inventory/inventory.service";
+import { purchaseVehicle, restockVehicle } from "../inventory/inventory.service";
 import { VehicleCategory } from "@prisma/client";
 import { ApiError } from "../../utils/ApiError";
 
@@ -107,6 +107,22 @@ export async function purchase(req: Request, res: Response, next: NextFunction):
     res.status(200).json({
       success: true,
       message: "Vehicle purchased successfully",
+      data: vehicle,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function restock(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { id } = req.params;
+    const { amount } = req.body;
+    const vehicle = await restockVehicle(id as string, amount);
+
+    res.status(200).json({
+      success: true,
+      message: "Vehicle restocked successfully",
       data: vehicle,
     });
   } catch (error) {

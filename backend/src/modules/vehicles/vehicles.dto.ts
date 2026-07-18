@@ -16,3 +16,9 @@ export type CreateVehicleInput = z.infer<typeof CreateVehicleDto>;
 // For updates, all fields are optional but must pass original validation if provided.
 export const UpdateVehicleDto = CreateVehicleDto.partial();
 export type UpdateVehicleInput = z.infer<typeof UpdateVehicleDto>;
+
+// For restocking, amount must be a positive integer.
+export const RestockVehicleDto = z.object({
+  amount: z.number().int().positive("Restock amount must be a positive integer"),
+});
+export type RestockVehicleInput = z.infer<typeof RestockVehicleDto>;
