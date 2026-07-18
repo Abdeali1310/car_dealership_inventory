@@ -1,4 +1,5 @@
 import { VehicleCategory } from "@prisma/client";
+import prisma from "../../lib/prisma";
 
 interface CreateVehicleInput {
   make: string;
@@ -11,5 +12,16 @@ interface CreateVehicleInput {
 }
 
 export async function createVehicle(data: CreateVehicleInput): Promise<any> {
-  throw new Error("Not implemented");
+  const vehicle = await prisma.vehicle.create({
+    data: {
+      make: data.make,
+      model: data.model,
+      category: data.category,
+      price: data.price,
+      quantity: data.quantity,
+      description: data.description,
+      imageUrl: data.imageUrl,
+    },
+  });
+  return vehicle;
 }
