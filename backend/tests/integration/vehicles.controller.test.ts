@@ -477,3 +477,98 @@ describe("POST /api/vehicles/:id/purchase", () => {
     expect(res.body.message).toBe("Vehicle not found");
   });
 });
+
+describe("POST /api/vehicles/:id/restock", () => {
+  let adminToken: string;
+  let customerToken: string;
+  let vehicleId: string;
+
+  beforeEach(async () => {
+    adminToken = signToken({
+      id: "admin-id-123",
+      sub: "admin-id-123",
+      email: "admin_test@example.com",
+      role: "ADMIN",
+    });
+
+    customerToken = signToken({
+      id: "customer-id-123",
+      sub: "customer-id-123",
+      email: "customer_test@example.com",
+      role: "CUSTOMER",
+    });
+
+    // Seed a vehicle
+    const vehicle = await prisma.vehicle.create({
+      data: {
+        make: "Toyota",
+        model: "Highlander",
+        category: "SUV",
+        price: 40000.00,
+        quantity: 5,
+      },
+    });
+    vehicleId = vehicle.id;
+  });
+
+  it("should allow an ADMIN to restock a vehicle and return 200 with updated stock", async () => {
+    const res = await request(app)
+      .post(`/api/vehicles/${vehicleId}/restock`)
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ amount: 5 });
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.message).toBe("Vehicle restocked successfully");
+    expect(res.body.data.quantity).toBe(10);
+
+    // Verify in db
+    const dbVehicle = await prisma.vehicle.findUnique({
+      where: { id: vehicleId },
+    });
+    expect(dbVehicle?.quantity).toBe(10);
+  });
+
+  it("should deny access with 403 Forbidden when user is a CUSTOMER", async () => {
+    const res = await request(app)
+      .post(`/api/vehicles/${vehicleId}/restock`)
+      .set("Authorization", `Bearer ${customerToken}`)
+      .send({ amount: 5 });
+
+    expect(res.status).toBe(403);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("Forbidden: Access denied");
+  });
+
+  it("should deny access with 401 Unauthorized when no token is provided", async () => {
+    const res = await request(app)
+      .post(`/api/vehicles/${vehicleId}/restock`)
+      .send({ amount: 5 });
+
+    expect(res.status).toBe(401);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("No token provided");
+  });
+
+  it("should return 400 Bad Request when restock amount is 0, negative, or invalid", async () => {
+    const res = await request(app)
+      .post(`/api/vehicles/${vehicleId}/restock`)
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ amount: -3 });
+
+    expect(res.status).toBe(400);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("Validation failed");
+  });
+
+  it("should return 404 Not Found if vehicle does not exist", async () => {
+    const res = await request(app)
+      .post("/api/vehicles/non-existent-id/restock")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ amount: 5 });
+
+    expect(res.status).toBe(404);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("Vehicle not found");
+  });
+});

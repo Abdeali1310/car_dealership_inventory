@@ -41,5 +41,39 @@ export async function purchaseVehicle(vehicleId: string, userId: string): Promis
 }
 
 export async function restockVehicle(vehicleId: string, amount: number): Promise<any> {
-  throw new Error("Not implemented");
+  if (amount <= 0) {
+    throw new ApiError(400, "Restock amount must be a positive integer");
+  }
+
+  // Wrapped in a transaction so we never end up incrementing stock without a matching log entry, or vice versa
+  return prisma.$transaction(async (tx) => {
+    const vehicle = await tx.vehicle.findUnique({
+      where: { id: vehicleId },
+    });
+
+    if (!vehicle) {
+      throw new ApiError(404, "Vehicle not found");
+    }
+
+    // Increment quantity by amount
+    const updatedVehicle = await tx.vehicle.update({
+      where: { id: vehicleId },
+      data: {
+        quantity: {
+          increment: amount,
+        },
+      },
+    });
+
+    // Create log entry
+    await tx.inventoryTransaction.create({
+      data: {
+        vehicleId,
+        type: "RESTOCK",
+        quantityChange: amount,
+      },
+    });
+
+    return updatedVehicle;
+  });
 }
