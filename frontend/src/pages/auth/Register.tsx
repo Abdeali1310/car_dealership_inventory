@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { toast } from "sonner";
 import { Car, Loader2, User, Mail, Lock, Eye, EyeOff } from "lucide-react";
 
 const registerSchema = z
@@ -24,7 +25,7 @@ const Register: React.FC = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
   const [serverError, setServerError] = useState<string | null>(null);
-
+  
   // State for toggling password visibility
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -41,11 +42,13 @@ const Register: React.FC = () => {
     setServerError(null);
     try {
       await register(data.fullName, data.email, data.password);
+      toast.success("Account created successfully!");
       navigate("/");
     } catch (error: any) {
       console.error("Registration error:", error);
       const message = error.response?.data?.message || "Registration failed. Please try again.";
       setServerError(message);
+      toast.error(message);
     }
   };
 

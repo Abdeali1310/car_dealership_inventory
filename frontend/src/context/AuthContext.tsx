@@ -64,12 +64,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const register = async (fullName: string, email: string, password: string) => {
-    const response = await api.post("/auth/signup", { fullName, email, password });
-    if (response.data && response.data.success) {
-      const { token: receivedToken, user: receivedUser } = response.data.data;
-      localStorage.setItem("token", receivedToken);
-      setToken(receivedToken);
-      setUser(receivedUser);
+    // 1. Send signup request to the correct route (/auth/register)
+    const signupResponse = await api.post("/auth/register", { fullName, email, password });
+    
+    if (signupResponse.data && signupResponse.data.success) {
+      // 2. Automatically log in the user immediately to establish token and session
+      const loginResponse = await api.post("/auth/login", { email, password });
+      
+      if (loginResponse.data && loginResponse.data.success) {
+        const { token: receivedToken, user: receivedUser } = loginResponse.data.data;
+        localStorage.setItem("token", receivedToken);
+        setToken(receivedToken);
+        setUser(receivedUser);
+      }
     }
   };
 

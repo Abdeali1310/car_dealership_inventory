@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { toast } from "sonner";
 import { Car, Loader2, Mail, Lock, Eye, EyeOff } from "lucide-react";
 
 const loginSchema = z.object({
@@ -17,7 +18,7 @@ const Login: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [serverError, setServerError] = useState<string | null>(null);
-
+  
   // State for toggling password visibility
   const [showPassword, setShowPassword] = useState(false);
 
@@ -33,11 +34,13 @@ const Login: React.FC = () => {
     setServerError(null);
     try {
       await login(data.email, data.password);
+      toast.success("Welcome back!");
       navigate("/");
     } catch (error: any) {
       console.error("Login error:", error);
-      // Security-minded touch: do not leak whether email or password was wrong
-      setServerError("Invalid email or password");
+      const message = "Invalid email or password";
+      setServerError(message);
+      toast.error(message);
     }
   };
 
