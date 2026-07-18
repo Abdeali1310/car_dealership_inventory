@@ -27,5 +27,10 @@ export async function createVehicle(data: CreateVehicleInput): Promise<any> {
 }
 
 export async function getAllVehicles(): Promise<any[]> {
-  throw new Error("Not implemented");
+  const vehicles = await prisma.vehicle.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+  return vehicles;
 }

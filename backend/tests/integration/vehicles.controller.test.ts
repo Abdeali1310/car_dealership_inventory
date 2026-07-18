@@ -109,3 +109,27 @@ describe("POST /api/vehicles", () => {
     );
   });
 });
+
+describe("GET /api/vehicles", () => {
+  it("should return 200 OK and a list of all vehicles", async () => {
+    // Seed a vehicle
+    await prisma.vehicle.create({
+      data: {
+        make: "Toyota",
+        model: "Corolla",
+        category: "SEDAN",
+        price: 20000.00,
+        quantity: 5,
+      },
+    });
+
+    const res = await request(app).get("/api/vehicles");
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data).toBeDefined();
+    expect(Array.isArray(res.body.data)).toBe(true);
+    expect(res.body.data.length).toBe(1);
+    expect(res.body.data[0].make).toBe("Toyota");
+  });
+});
