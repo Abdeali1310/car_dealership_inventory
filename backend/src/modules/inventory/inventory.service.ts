@@ -39,3 +39,7 @@ export async function purchaseVehicle(vehicleId: string, userId: string): Promis
     return updatedVehicle;
   });
 }
+
+export async function restockVehicle(vehicleId: string, amount: number): Promise<any> {
+  throw new Error("Not implemented");
+}
