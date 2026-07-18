@@ -24,4 +24,12 @@ describe("auth.service.ts - registerUser", () => {
     });
     expect(dbUser?.password).not.toBe("securePassword");
   });
+
+  it("should throw an error if the email is already registered", async () => {
+    await registerUser("dup@example.com", "pass1", "Dup User");
+
+    await expect(
+      registerUser("dup@example.com", "pass2", "Another User")
+    ).rejects.toThrow("Email already registered");
+  });
 });
