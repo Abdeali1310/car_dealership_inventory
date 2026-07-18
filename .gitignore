@@ -1,0 +1,47 @@
+architecture.md
+design.md
+tasks.md
+
+# Runtime Artifacts
+node_modules/
+dist/
+coverage/
+.turbo/
+*.log
+*.tgz
+
+# Environment Variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE / Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Build Artifacts (Specific)
+# For Backend
+backend/node_modules/
+backend/dist/
+backend/coverage/
+backend/*.log
+
+# For Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/coverage/
+frontend/*.log
+frontend/.vite/
+
+# Prisma (Generated Client)
+# Uncomment if you don't want generated client in git
+# prisma/client/
