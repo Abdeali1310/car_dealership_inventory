@@ -1,11 +1,14 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import VehicleTable from "./VehicleTable";
+
+// Define a mutable role variable for dynamic role switching
+let mockRole = "CUSTOMER";
 
 // Mock AuthContext
 vi.mock("../../context/AuthContext", () => ({
   useAuth: () => ({
-    user: { role: "CUSTOMER", fullName: "Test Customer" },
+    user: { role: mockRole, fullName: "Test User" },
   }),
 }));
 
@@ -29,6 +32,11 @@ const mockVehicles = [
 ];
 
 describe("VehicleTable Component", () => {
+  beforeEach(() => {
+    // Reset role to CUSTOMER before each test to ensure test isolation
+    mockRole = "CUSTOMER";
+  });
+
   it("should render purchase buttons for customer role", () => {
     const handlePurchase = vi.fn();
     render(<VehicleTable vehicles={mockVehicles} onPurchase={handlePurchase} />);
@@ -54,5 +62,37 @@ describe("VehicleTable Component", () => {
     const camryRow = screen.getByText("Toyota").closest("tr");
     const camryButton = camryRow?.querySelector("button");
     expect(camryButton).toBeDisabled();
+  });
+
+  it("should render Restock, Edit, and Delete controls for admin role, hiding Purchase options", () => {
+    // Switch role to ADMIN for this test case
+    mockRole = "ADMIN";
+
+    const handleEdit = vi.fn();
+    const handleDelete = vi.fn();
+    const handleRestock = vi.fn();
+
+    render(
+      <VehicleTable
+        vehicles={mockVehicles}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onRestock={handleRestock}
+      />
+    );
+
+    // Should NOT render purchase buttons under ADMIN role view
+    const purchaseButtons = screen.queryAllByRole("button", { name: /purchase/i });
+    expect(purchaseButtons).toHaveLength(0);
+
+    // Should render Edit, Delete, and Restock buttons for every vehicle
+    const editButtons = screen.getAllByRole("button", { name: /edit/i });
+    expect(editButtons).toHaveLength(2);
+
+    const deleteButtons = screen.getAllByRole("button", { name: /delete/i });
+    expect(deleteButtons).toHaveLength(2);
+
+    const restockButtons = screen.getAllByRole("button", { name: /restock/i });
+    expect(restockButtons).toHaveLength(2);
   });
 });
