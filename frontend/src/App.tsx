@@ -1,14 +1,53 @@
-import './App.css'
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Navbar from "./components/layout/Navbar";
+import ProtectedRoute from "./components/layout/ProtectedRoute";
+import Dashboard from "./pages/Dashboard";
+import ManageVehicles from "./pages/admin/ManageVehicles";
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
 
 function App() {
   return (
-    <div className="p-8 flex flex-col items-center justify-center min-h-screen gap-4">
-      <h1 className="text-2xl font-sans font-semibold text-text-primary">DriveDealer Theme Sanity Check</h1>
-      <button className="px-4 py-2 bg-brand hover:bg-brand-hover text-white font-sans rounded-standard transition-colors">
-        Theme Accent Button
-      </button>
-    </div>
-  )
+    <BrowserRouter>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
+        {/* Protected Routes Wrapper */}
+        <Route element={<ProtectedRoute />}>
+          <Route
+            path="/"
+            element={
+              <>
+                <Navbar />
+                <main className="max-w-[1200px] mx-auto">
+                  <Dashboard />
+                </main>
+              </>
+            }
+          />
+        </Route>
+
+        <Route element={<ProtectedRoute adminOnly />}>
+          <Route
+            path="/admin/vehicles"
+            element={
+              <>
+                <Navbar />
+                <main className="max-w-[1200px] mx-auto">
+                  <ManageVehicles />
+                </main>
+              </>
+            }
+          />
+        </Route>
+
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
