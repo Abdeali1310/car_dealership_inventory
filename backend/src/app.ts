@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import authRoutes from "./modules/auth/auth.routes";
+import vehiclesRoutes from "./modules/vehicles/vehicles.routes";
 import { errorHandler } from "./middleware/error.middleware";
 
 const app = express();
@@ -11,6 +12,7 @@ app.use(express.json());
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/vehicles", vehiclesRoutes);
 
 // Health Check Route
 app.get("/api/health", (req, res) => {
