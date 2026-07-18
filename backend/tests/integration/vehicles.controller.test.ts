@@ -133,3 +133,72 @@ describe("GET /api/vehicles", () => {
     expect(res.body.data[0].make).toBe("Toyota");
   });
 });
+
+describe("GET /api/vehicles/search", () => {
+  let customerToken: string;
+
+  beforeEach(async () => {
+    customerToken = signToken({
+      id: "customer-id-123",
+      sub: "customer-id-123",
+      email: "customer_test@example.com",
+      role: "CUSTOMER",
+    });
+
+    // Seed some vehicles
+    await prisma.vehicle.create({
+      data: {
+        make: "Honda",
+        model: "Civic",
+        category: "SEDAN",
+        price: 22000.00,
+        quantity: 10,
+      },
+    });
+
+    await prisma.vehicle.create({
+      data: {
+        make: "Ford",
+        model: "F-150",
+        category: "TRUCK",
+        price: 45000.00,
+        quantity: 2,
+      },
+    });
+  });
+
+  it("should allow an authenticated CUSTOMER to search vehicles and return filtered results", async () => {
+    const res = await request(app)
+      .get("/api/vehicles/search")
+      .set("Authorization", `Bearer ${customerToken}`)
+      .query({ make: "honda" });
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data).toBeDefined();
+    expect(res.body.data.length).toBe(1);
+    expect(res.body.data[0].make).toBe("Honda");
+  });
+
+  it("should allow searching by price range minPrice/maxPrice", async () => {
+    const res = await request(app)
+      .get("/api/vehicles/search")
+      .set("Authorization", `Bearer ${customerToken}`)
+      .query({ minPrice: 30000, maxPrice: 50000 });
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.length).toBe(1);
+    expect(res.body.data[0].make).toBe("Ford");
+  });
+
+  it("should deny access with 401 Unauthorized when no token is provided", async () => {
+    const res = await request(app)
+      .get("/api/vehicles/search")
+      .query({ make: "honda" });
+
+    expect(res.status).toBe(401);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("No token provided");
+  });
+});

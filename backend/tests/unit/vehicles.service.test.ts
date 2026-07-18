@@ -1,4 +1,4 @@
-import { createVehicle, getAllVehicles } from "../../src/modules/vehicles/vehicles.service";
+import { createVehicle, getAllVehicles, searchVehicles } from "../../src/modules/vehicles/vehicles.service";
 import prisma from "../../src/lib/prisma";
 
 describe("vehicles.service.ts - createVehicle", () => {
@@ -62,5 +62,71 @@ describe("vehicles.service.ts - getAllVehicles", () => {
     const makes = vehicles.map(v => v.make);
     expect(makes).toContain("Honda");
     expect(makes).toContain("Ford");
+  });
+});
+
+describe("vehicles.service.ts - searchVehicles", () => {
+  beforeEach(async () => {
+    // Seed test vehicles
+    await createVehicle({
+      make: "Tesla",
+      model: "Model 3",
+      category: "SEDAN" as const,
+      price: 45000.00,
+      quantity: 3,
+    });
+
+    await createVehicle({
+      make: "Toyota",
+      model: "RAV4",
+      category: "SUV" as const,
+      price: 32000.00,
+      quantity: 4,
+    });
+
+    await createVehicle({
+      make: "Ford",
+      model: "F-150 Raptor",
+      category: "TRUCK" as const,
+      price: 75000.00,
+      quantity: 1,
+    });
+  });
+
+  it("should filter by make (case-insensitive partial match)", async () => {
+    const results = await searchVehicles({ make: "tes" });
+    expect(results.length).toBe(1);
+    expect(results[0].make).toBe("Tesla");
+  });
+
+  it("should filter by model (case-insensitive partial match)", async () => {
+    const results = await searchVehicles({ model: "rav" });
+    expect(results.length).toBe(1);
+    expect(results[0].model).toBe("RAV4");
+  });
+
+  it("should filter by category (exact enum match)", async () => {
+    const results = await searchVehicles({ category: "SUV" });
+    expect(results.length).toBe(1);
+    expect(results[0].category).toBe("SUV");
+  });
+
+  it("should filter by price range (minPrice/maxPrice)", async () => {
+    const results = await searchVehicles({ minPrice: 30000, maxPrice: 50000 });
+    expect(results.length).toBe(2);
+    const makes = results.map(r => r.make);
+    expect(makes).toContain("Tesla");
+    expect(makes).toContain("Toyota");
+  });
+
+  it("should combine multiple filters", async () => {
+    const results = await searchVehicles({ make: "Ford", category: "TRUCK" });
+    expect(results.length).toBe(1);
+    expect(results[0].model).toBe("F-150 Raptor");
+  });
+
+  it("should return all vehicles if no filters are provided", async () => {
+    const results = await searchVehicles({});
+    expect(results.length).toBe(3);
   });
 });
