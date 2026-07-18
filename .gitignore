@@ -43,5 +43,6 @@ frontend/*.log
 frontend/.vite/
 
 # Prisma (Generated Client)
-# Uncomment if you don't want generated client in git
 # prisma/client/
+
+seed.ts
