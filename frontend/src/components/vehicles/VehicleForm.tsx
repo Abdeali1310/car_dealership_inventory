@@ -4,8 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import api from "../../api/axios";
 import { toast } from "sonner";
-import { Loader2, X, Upload, Car } from "lucide-react";
+import { Loader2, X, Upload } from "lucide-react";
 import type { Vehicle } from "./VehicleTable";
+import { getVehicleVisual } from "../../utils/vehicleImage";
 
 const VEHICLE_CATEGORIES = [
   { value: "SEDAN", label: "Sedan" },
@@ -53,6 +54,7 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<VehicleFormInput>({
     resolver: zodResolver(vehicleFormSchema),
@@ -66,6 +68,9 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
       imageUrl: initialData?.imageUrl || "",
     },
   });
+
+  const selectedCategory = watch("category");
+  const visual = getVehicleVisual({ imageUrl: previewUrl, category: selectedCategory });
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -240,11 +245,11 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
             <label className="text-[12px] font-medium text-text-secondary">Vehicle Image</label>
             <div className="flex items-center gap-4 p-3 border border-border rounded-standard bg-bg-secondary">
               {/* Preview Thumbnail */}
-              <div className="w-14 h-14 rounded-standard border border-border-strong overflow-hidden bg-white flex items-center justify-center flex-shrink-0">
-                {previewUrl ? (
-                  <img src={previewUrl} alt="Vehicle preview" className="w-full h-full object-cover" />
+              <div className="w-14 h-14 rounded-standard border border-border-strong overflow-hidden flex items-center justify-center flex-shrink-0 select-none bg-card-photo-bg text-3xl">
+                {visual.type === "image" && visual.url ? (
+                  <img src={visual.url} alt="Vehicle preview" className="w-full h-full object-cover" />
                 ) : (
-                  <Car className="w-6 h-6 text-text-muted" />
+                  <span>{visual.icon}</span>
                 )}
               </div>
 

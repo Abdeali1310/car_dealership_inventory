@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "../../api/axios";
-import VehicleTable, { type Vehicle } from "../../components/vehicles/VehicleTable";
+import { type Vehicle } from "../../components/vehicles/VehicleTable";
+import VehicleCard from "../../components/vehicles/VehicleCard";
 import ConfirmDialog from "../../components/shared/ConfirmDialog";
 import VehicleForm from "../../components/vehicles/VehicleForm";
 import RestockDialog from "../../components/vehicles/RestockDialog";
@@ -96,21 +97,24 @@ const ManageVehicles: React.FC = () => {
       </div>
 
       {isLoading ? (
-        /* Table skeleton */
-        <div className="w-full border border-border rounded-standard bg-bg-primary overflow-hidden animate-pulse">
-          <div className="h-[40px] bg-bg-secondary border-b border-border" />
-          <div className="flex flex-col">
-            {[1, 2, 3, 4, 5].map((idx) => (
-              <div key={idx} className="h-[58px] border-b border-border flex items-center px-4 justify-between">
-                <div className="h-4 bg-bg-hover w-[80px] rounded-standard" />
-                <div className="h-4 bg-bg-hover w-[120px] rounded-standard" />
-                <div className="h-4 bg-bg-hover w-[100px] rounded-standard" />
-                <div className="h-4 bg-bg-hover w-[70px] rounded-standard" />
-                <div className="h-4 bg-bg-hover w-[90px] rounded-standard" />
-                <div className="h-[38px] bg-bg-hover w-[90px] rounded-standard" />
+        /* Card skeleton grid */
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-pulse">
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((idx) => (
+            <div key={idx} className="border border-border rounded-standard overflow-hidden bg-bg-primary flex flex-col h-[340px]">
+              <div className="h-[180px] bg-bg-secondary" />
+              <div className="p-4 flex flex-col gap-3 flex-grow">
+                <div className="h-5 bg-bg-hover rounded-standard w-3/4" />
+                <div className="h-3 bg-bg-hover rounded-standard w-1/4" />
+                <div className="h-4 bg-bg-hover rounded-standard w-full mt-2" />
+                <div className="h-4 bg-bg-hover rounded-standard w-5/6" />
+                <div className="mt-auto pt-3 border-t border-border flex justify-between items-center">
+                  <div className="h-3 bg-bg-hover rounded-standard w-10" />
+                  <div className="h-4 bg-bg-hover rounded-standard w-20" />
+                </div>
+                <div className="h-[38px] bg-bg-hover rounded-standard w-full mt-2" />
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       ) : isError ? (
         <div className="border border-status-critical/20 rounded-standard p-12 bg-bg-primary flex flex-col items-center justify-center text-center gap-3">
@@ -137,13 +141,18 @@ const ManageVehicles: React.FC = () => {
           </p>
         </div>
       ) : (
-        <VehicleTable
-          vehicles={vehicles}
-          onEdit={handleEditClick}
-          onDelete={handleDeleteClick}
-          onRestock={handleRestockClick}
-          deletingId={vehicleToDelete?.id || null}
-        />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {vehicles.map((vehicle) => (
+            <VehicleCard
+              key={vehicle.id}
+              vehicle={vehicle}
+              onEdit={handleEditClick}
+              onDelete={handleDeleteClick}
+              onRestock={handleRestockClick}
+              isDeleting={vehicleToDelete?.id === vehicle.id && isDeleting}
+            />
+          ))}
+        </div>
       )}
 
       {/* Confirmation Dialog for Delete */}
