@@ -92,3 +92,60 @@ describe("POST /api/auth/register", () => {
     expect(res.body.message).toBe("Email already registered");
   });
 });
+
+describe("POST /api/auth/login", () => {
+  beforeEach(async () => {
+    // Register a user for login testing
+    await request(app)
+      .post("/api/auth/register")
+      .send({
+        email: "login_integration@example.com",
+        password: "correctPassword123",
+        fullName: "Login Integration User",
+      });
+  });
+
+  it("should login successfully and return 200 with token and user object", async () => {
+    const res = await request(app)
+      .post("/api/auth/login")
+      .send({
+        email: "login_integration@example.com",
+        password: "correctPassword123",
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data).toBeDefined();
+    expect(res.body.data.token).toBeDefined();
+    expect(typeof res.body.data.token).toBe("string");
+    expect(res.body.data.user).toBeDefined();
+    expect(res.body.data.user.email).toBe("login_integration@example.com");
+    expect(res.body.data.user.password).toBeUndefined(); // Should not leak password
+  });
+
+  it("should return 401 if password is wrong", async () => {
+    const res = await request(app)
+      .post("/api/auth/login")
+      .send({
+        email: "login_integration@example.com",
+        password: "wrongPassword",
+      });
+
+    expect(res.status).toBe(401);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("Invalid credentials");
+  });
+
+  it("should return 401 if email does not exist", async () => {
+    const res = await request(app)
+      .post("/api/auth/login")
+      .send({
+        email: "nonexistent_integration@example.com",
+        password: "anyPassword",
+      });
+
+    expect(res.status).toBe(401);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("Invalid credentials");
+  });
+});
