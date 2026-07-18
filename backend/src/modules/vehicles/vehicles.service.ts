@@ -1,5 +1,6 @@
 import { VehicleCategory } from "@prisma/client";
 import prisma from "../../lib/prisma";
+import { ApiError } from "../../utils/ApiError";
 
 interface CreateVehicleInput {
   make: string;
@@ -85,5 +86,20 @@ export async function searchVehicles(filters: SearchFilters): Promise<any[]> {
 }
 
 export async function updateVehicle(id: string, data: Partial<CreateVehicleInput>): Promise<any> {
-  throw new Error("Not implemented");
+  // Check first with findUnique to explicitly throw a clear 404 ApiError if the record doesn't exist.
+  // This is clearer and safer than handling Prisma's generic error codes directly.
+  const existingVehicle = await prisma.vehicle.findUnique({
+    where: { id },
+  });
+
+  if (!existingVehicle) {
+    throw new ApiError(404, "Vehicle not found");
+  }
+
+  const updatedVehicle = await prisma.vehicle.update({
+    where: { id },
+    data,
+  });
+
+  return updatedVehicle;
 }

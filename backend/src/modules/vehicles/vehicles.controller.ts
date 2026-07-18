@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { createVehicle, getAllVehicles, searchVehicles } from "./vehicles.service";
+import { createVehicle, getAllVehicles, searchVehicles, updateVehicle } from "./vehicles.service";
 import { VehicleCategory } from "@prisma/client";
 
 export async function create(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -56,6 +56,21 @@ export async function search(req: Request, res: Response, next: NextFunction): P
     res.status(200).json({
       success: true,
       data: vehicles,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function update(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { id } = req.params;
+    const vehicle = await updateVehicle(id as string, req.body);
+
+    res.status(200).json({
+      success: true,
+      message: "Vehicle updated successfully",
+      data: vehicle,
     });
   } catch (error) {
     next(error);

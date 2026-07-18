@@ -202,3 +202,107 @@ describe("GET /api/vehicles/search", () => {
     expect(res.body.message).toBe("No token provided");
   });
 });
+
+describe("PUT /api/vehicles/:id", () => {
+  let adminToken: string;
+  let customerToken: string;
+  let vehicleId: string;
+
+  beforeEach(async () => {
+    adminToken = signToken({
+      id: "admin-id-123",
+      sub: "admin-id-123",
+      email: "admin_test@example.com",
+      role: "ADMIN",
+    });
+
+    customerToken = signToken({
+      id: "customer-id-123",
+      sub: "customer-id-123",
+      email: "customer_test@example.com",
+      role: "CUSTOMER",
+    });
+
+    // Seed a vehicle
+    const vehicle = await prisma.vehicle.create({
+      data: {
+        make: "Subaru",
+        model: "Outback",
+        category: "SUV",
+        price: 33000.00,
+        quantity: 4,
+      },
+    });
+    vehicleId = vehicle.id;
+  });
+
+  it("should allow an ADMIN to update a vehicle successfully and return 200", async () => {
+    const res = await request(app)
+      .put(`/api/vehicles/${vehicleId}`)
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({
+        price: 35000.00,
+        quantity: 5,
+        description: "Updated Outback description",
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data).toBeDefined();
+    expect(Number(res.body.data.price)).toBe(35000.00);
+    expect(res.body.data.quantity).toBe(5);
+    expect(res.body.data.description).toBe("Updated Outback description");
+    expect(res.body.data.make).toBe("Subaru"); // Unchanged field
+  });
+
+  it("should deny access with 403 Forbidden when user is a CUSTOMER", async () => {
+    const res = await request(app)
+      .put(`/api/vehicles/${vehicleId}`)
+      .set("Authorization", `Bearer ${customerToken}`)
+      .send({
+        price: 35000.00,
+      });
+
+    expect(res.status).toBe(403);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("Forbidden: Access denied");
+  });
+
+  it("should deny access with 401 Unauthorized when no token is provided", async () => {
+    const res = await request(app)
+      .put(`/api/vehicles/${vehicleId}`)
+      .send({
+        price: 35000.00,
+      });
+
+    expect(res.status).toBe(401);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("No token provided");
+  });
+
+  it("should return 404 Not Found if the vehicle does not exist", async () => {
+    const res = await request(app)
+      .put("/api/vehicles/non-existent-id")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({
+        price: 35000.00,
+      });
+
+    expect(res.status).toBe(404);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("Vehicle not found");
+  });
+
+  it("should return 400 Bad Request if validation fails (negative price)", async () => {
+    const res = await request(app)
+      .put(`/api/vehicles/${vehicleId}`)
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({
+        price: -50.00,
+      });
+
+    expect(res.status).toBe(400);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("Validation failed");
+  });
+});

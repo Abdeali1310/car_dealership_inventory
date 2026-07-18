@@ -12,3 +12,7 @@ export const CreateVehicleDto = z.object({
 });
 
 export type CreateVehicleInput = z.infer<typeof CreateVehicleDto>;
+
+// For updates, all fields are optional but must pass original validation if provided.
+export const UpdateVehicleDto = CreateVehicleDto.partial();
+export type UpdateVehicleInput = z.infer<typeof UpdateVehicleDto>;
