@@ -2,7 +2,7 @@ import { requireRole } from "../../src/middleware/role.middleware";
 import { Request, Response, NextFunction } from "express";
 
 describe("role.middleware.ts - requireRole", () => {
-  let mockReq: Partial<Request>;
+  let mockReq: any;
   let mockRes: Partial<Response>;
   let nextFunction: NextFunction;
 
