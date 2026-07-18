@@ -385,3 +385,95 @@ describe("DELETE /api/vehicles/:id", () => {
     expect(res.body.message).toBe("Vehicle not found");
   });
 });
+
+describe("POST /api/vehicles/:id/purchase", () => {
+  let customerToken: string;
+  let customerId: string;
+  let vehicleId: string;
+
+  beforeEach(async () => {
+    customerId = "customer-user-id-456";
+    customerToken = signToken({
+      id: customerId,
+      sub: customerId,
+      email: "buyer_integration@example.com",
+      role: "CUSTOMER",
+    });
+
+    // Seed a customer user in db so referential integrity checks pass
+    await prisma.user.create({
+      data: {
+        id: customerId,
+        email: "buyer_integration@example.com",
+        password: "password123",
+        fullName: "Buyer Integration",
+        role: "CUSTOMER",
+      },
+    });
+
+    // Seed a vehicle
+    const vehicle = await prisma.vehicle.create({
+      data: {
+        make: "Mazda",
+        model: "CX-5",
+        category: "SUV",
+        price: 28000.00,
+        quantity: 3,
+      },
+    });
+    vehicleId = vehicle.id;
+  });
+
+  it("should allow any logged-in user to purchase a vehicle and return 200 with updated stock", async () => {
+    const res = await request(app)
+      .post(`/api/vehicles/${vehicleId}/purchase`)
+      .set("Authorization", `Bearer ${customerToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.message).toBe("Vehicle purchased successfully");
+    expect(res.body.data).toBeDefined();
+    expect(res.body.data.quantity).toBe(2);
+
+    // Verify in db
+    const dbVehicle = await prisma.vehicle.findUnique({
+      where: { id: vehicleId },
+    });
+    expect(dbVehicle?.quantity).toBe(2);
+  });
+
+  it("should return 400 Bad Request when vehicle is out of stock", async () => {
+    // Set stock to 0
+    await prisma.vehicle.update({
+      where: { id: vehicleId },
+      data: { quantity: 0 },
+    });
+
+    const res = await request(app)
+      .post(`/api/vehicles/${vehicleId}/purchase`)
+      .set("Authorization", `Bearer ${customerToken}`);
+
+    expect(res.status).toBe(400);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("Vehicle is out of stock");
+  });
+
+  it("should return 401 Unauthorized when no token is provided", async () => {
+    const res = await request(app)
+      .post(`/api/vehicles/${vehicleId}/purchase`);
+
+    expect(res.status).toBe(401);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("No token provided");
+  });
+
+  it("should return 404 Not Found if vehicle does not exist", async () => {
+    const res = await request(app)
+      .post("/api/vehicles/non-existent-id/purchase")
+      .set("Authorization", `Bearer ${customerToken}`);
+
+    expect(res.status).toBe(404);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("Vehicle not found");
+  });
+});
