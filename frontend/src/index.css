@@ -23,6 +23,10 @@
   --status-critical: #D93025;
   --status-neutral: #8A93A1;
 
+  --accent: #F97316;
+  --accent-hover: #EA580C;
+  --card-photo-bg: linear-gradient(135deg, #FDE8E8, #FDF0E4);
+
   --radius: 6px;
   --radius-pill: 999px;
   --font-sans: "IBM Plex Sans", Verdana, Geneva, sans-serif;
@@ -48,6 +52,10 @@
   --color-status-warning-bg: var(--status-warning-bg);
   --color-status-critical: var(--status-critical);
   --color-status-neutral: var(--status-neutral);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --background-image-card-photo-bg: var(--card-photo-bg);
 
   --radius-standard: var(--radius);
   --radius-pill: var(--radius-pill);
