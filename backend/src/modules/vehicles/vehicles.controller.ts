@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { createVehicle, getAllVehicles, searchVehicles, updateVehicle, deleteVehicle } from "./vehicles.service";
+import { purchaseVehicle } from "../inventory/inventory.service";
 import { VehicleCategory } from "@prisma/client";
+import { ApiError } from "../../utils/ApiError";
 
 export async function create(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
@@ -85,6 +87,27 @@ export async function remove(req: Request, res: Response, next: NextFunction): P
     res.status(200).json({
       success: true,
       message: "Vehicle deleted successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function purchase(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { id } = req.params;
+
+    if (!req.user) {
+      throw new ApiError(401, "Unauthorized");
+    }
+
+    const userId = req.user.sub || req.user.id;
+    const vehicle = await purchaseVehicle(id as string, userId);
+
+    res.status(200).json({
+      success: true,
+      message: "Vehicle purchased successfully",
+      data: vehicle,
     });
   } catch (error) {
     next(error);
