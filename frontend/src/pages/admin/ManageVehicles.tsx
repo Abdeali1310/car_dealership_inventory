@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "../../api/axios";
 import { type Vehicle } from "../../components/vehicles/VehicleTable";
@@ -6,11 +6,33 @@ import VehicleCard from "../../components/vehicles/VehicleCard";
 import ConfirmDialog from "../../components/shared/ConfirmDialog";
 import VehicleForm from "../../components/vehicles/VehicleForm";
 import RestockDialog from "../../components/vehicles/RestockDialog";
+import SearchFilterBar, { type FilterState } from "../../components/vehicles/SearchFilterBar";
 import { toast } from "sonner";
-import { Plus, Settings, AlertTriangle } from "lucide-react";
+import { Plus, Settings, AlertTriangle, Car } from "lucide-react";
 
 const ManageVehicles: React.FC = () => {
   const queryClient = useQueryClient();
+
+  // Search & Filter State
+  const [filters, setFilters] = useState<FilterState>({
+    make: "",
+    model: "",
+    category: "",
+    minPrice: "",
+    maxPrice: "",
+  });
+
+  const [debouncedFilters, setDebouncedFilters] = useState<FilterState>(filters);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedFilters(filters);
+    }, 300);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [filters]);
   
   // Delete dialog state
   const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null);
@@ -23,11 +45,18 @@ const ManageVehicles: React.FC = () => {
   // Restock dialog state
   const [vehicleToRestock, setVehicleToRestock] = useState<Vehicle | null>(null);
 
-  // Fetch all vehicles
+  // Fetch filtered vehicles
   const { data: vehicles, isLoading, isError, refetch } = useQuery<Vehicle[]>({
-    queryKey: ["vehicles"],
+    queryKey: ["vehicles", debouncedFilters],
     queryFn: async () => {
-      const response = await api.get("/vehicles");
+      const params: Record<string, string | number> = {};
+      if (debouncedFilters.make) params.make = debouncedFilters.make;
+      if (debouncedFilters.model) params.model = debouncedFilters.model;
+      if (debouncedFilters.category) params.category = debouncedFilters.category;
+      if (debouncedFilters.minPrice) params.minPrice = Number(debouncedFilters.minPrice);
+      if (debouncedFilters.maxPrice) params.maxPrice = Number(debouncedFilters.maxPrice);
+
+      const response = await api.get("/vehicles/search", { params });
       return response.data.data;
     },
   });
@@ -96,6 +125,9 @@ const ManageVehicles: React.FC = () => {
         </button>
       </div>
 
+      {/* Search & Filter Bar */}
+      <SearchFilterBar filters={filters} onChange={setFilters} />
+
       {isLoading ? (
         /* Card skeleton grid */
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-pulse">
@@ -135,9 +167,12 @@ const ManageVehicles: React.FC = () => {
         </div>
       ) : !hasVehicles ? (
         <div className="border border-border rounded-standard p-12 bg-bg-primary flex flex-col items-center justify-center text-center gap-3">
-          <h2 className="text-[16px] font-semibold text-text-primary">No Vehicles in Inventory</h2>
+          <div className="w-12 h-12 rounded-pill bg-bg-secondary flex items-center justify-center">
+            <Car className="w-6 h-6 text-text-secondary" />
+          </div>
+          <h2 className="text-[16px] font-semibold text-text-primary">No Vehicles Found</h2>
           <p className="text-[14px] text-text-secondary max-w-[400px]">
-            The inventory is empty. Click the "Add Vehicle" button above to add the first vehicle.
+            No vehicles match your current search and filter criteria. Try adjusting your filters.
           </p>
         </div>
       ) : (
