@@ -1,1 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
 @import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F6F7F9;
+  --bg-hover: #EEF1F4;
+  --border: #E2E5EA;
+  --border-strong: #C7CCD3;
+  --text-primary: #16181D;
+  --text-secondary: #5B6472;
+  --text-muted: #8A93A1;
+
+  --brand: #1B5FBF;
+  --brand-hover: #174F9E;
+  --brand-subtle-bg: #EAF1FC;
+
+  --status-success: #188038;
+  --status-warning-text: #B58A00;
+  --status-warning-bg: #F5C518;
+  --status-critical: #D93025;
+  --status-neutral: #8A93A1;
+
+  --radius: 6px;
+  --radius-pill: 999px;
+  --font-sans: "IBM Plex Sans", Verdana, Geneva, sans-serif;
+  --font-mono: "IBM Plex Mono", "JetBrains Mono", monospace;
+}
+
+@theme {
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-hover: var(--bg-hover);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-subtle-bg: var(--brand-subtle-bg);
+
+  --color-status-success: var(--status-success);
+  --color-status-warning-text: var(--status-warning-text);
+  --color-status-warning-bg: var(--status-warning-bg);
+  --color-status-critical: var(--status-critical);
+  --color-status-neutral: var(--status-neutral);
+
+  --radius-standard: var(--radius);
+  --radius-pill: var(--radius-pill);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+html, body {
+  background-color: #FFFFFF !important;
+  color: #16181D !important;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
