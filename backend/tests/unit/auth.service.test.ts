@@ -56,4 +56,10 @@ describe("auth.service.ts - loginUser", () => {
       loginUser("login_test@example.com", "wrongPassword")
     ).rejects.toThrow("Invalid credentials");
   });
+
+  it("should throw an error when the email doesn't exist", async () => {
+    await expect(
+      loginUser("nonexistent@example.com", "anyPassword")
+    ).rejects.toThrow("Invalid credentials");
+  });
 });

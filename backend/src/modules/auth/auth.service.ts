@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import prisma from "../../lib/prisma";
 
 export async function registerUser(email: string, password: string, fullName: string): Promise<any> {
@@ -28,5 +29,35 @@ export async function registerUser(email: string, password: string, fullName: st
 }
 
 export async function loginUser(email: string, password: string): Promise<any> {
-  throw new Error("Not implemented");
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (!user) {
+    throw new Error("Invalid credentials");
+  }
+
+  // Compare the password
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) {
+    throw new Error("Invalid credentials");
+  }
+
+  // Generate JWT token
+  const secret = process.env.JWT_SECRET || "super_secret_key";
+  const expiresIn = process.env.JWT_EXPIRES_IN || "1d";
+  
+  const token = jwt.sign(
+    { id: user.id, email: user.email, role: user.role },
+    secret,
+    { expiresIn: expiresIn as any }
+  );
+
+  // Exclude password from the returned user object
+  const { password: _, ...userWithoutPassword } = user;
+
+  return {
+    token,
+    user: userWithoutPassword,
+  };
 }
