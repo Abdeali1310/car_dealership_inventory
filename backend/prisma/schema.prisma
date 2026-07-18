@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  CUSTOMER
+}
+
+enum VehicleCategory {
+  SEDAN
+  SUV
+  TRUCK
+  COUPE
+  HATCHBACK
+  CONVERTIBLE
+  VAN
+  MOTORCYCLE
+}
+
+enum TransactionType {
+  PURCHASE
+  RESTOCK
+}
+
+model User {
+  id           String                 @id @default(cuid())
+  email        String                 @unique
+  password     String                 // bcrypt hash, never store plain text
+  fullName     String
+  role         Role                   @default(CUSTOMER)
+  createdAt    DateTime               @default(now())
+  transactions InventoryTransaction[]
+}
+
+model Vehicle {
+  id           String                 @id @default(cuid())
+  make         String
+  model        String
+  category     VehicleCategory
+  price        Decimal                @db.Decimal(10, 2)
+  quantity     Int                    @default(0)
+  description  String?
+  imageUrl     String?
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+  transactions InventoryTransaction[]
+
+  @@index([make, model, category])
+}
+
+// One row per purchase or restock — an audit trail of every stock change.
+// Not required by the kata brief, but it's a small addition that makes the
+// "decrease/increase quantity" logic provable and traceable, and it's a
+// nice thing to point at in an interview when asked "how would you debug a
+// stock discrepancy?"
+model InventoryTransaction {
+  id              String          @id @default(cuid())
+  vehicleId       String
+  vehicle         Vehicle         @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  userId          String?
+  user            User?           @relation(fields: [userId], references: [id])
+  type            TransactionType
+  quantityChange  Int             // negative for PURCHASE, positive for RESTOCK
+  createdAt       DateTime        @default(now())
+
+  @@index([vehicleId])
+}
