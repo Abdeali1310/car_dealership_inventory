@@ -1,4 +1,4 @@
-import { BadgeVariant } from "../components/shared/Badge";
+import type { BadgeVariant } from "../components/shared/Badge";
 
 export function getStockStatus(quantity: number): { label: string; variant: BadgeVariant } {
   if (quantity >= 5) {

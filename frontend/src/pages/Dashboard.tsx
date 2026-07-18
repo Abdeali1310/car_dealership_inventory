@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import api from "../api/axios";
-import VehicleTable, { Vehicle } from "../components/vehicles/VehicleTable";
+import VehicleTable, { type Vehicle } from "../components/vehicles/VehicleTable";
 import { toast } from "sonner";
 import { Car } from "lucide-react";
 
