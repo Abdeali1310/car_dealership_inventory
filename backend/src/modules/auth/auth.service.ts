@@ -43,8 +43,13 @@ export async function loginUser(email: string, password: string): Promise<any> {
     throw new Error("Invalid credentials");
   }
 
-  // Generate JWT token using the helper function
-  const token = signToken({ id: user.id, email: user.email, role: user.role });
+  // Generate JWT token using the helper function, providing both sub and id
+  const token = signToken({
+    sub: user.id,
+    id: user.id,
+    email: user.email,
+    role: user.role,
+  });
 
   // Exclude password from the returned user object
   const { password: _, ...userWithoutPassword } = user;

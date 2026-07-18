@@ -19,7 +19,7 @@ describe("auth.middleware.ts - requireAuth", () => {
   });
 
   it("should call next() and attach user info when given a valid token", async () => {
-    const payload = { id: "user-123", email: "test@example.com", role: "CUSTOMER" };
+    const payload = { id: "user-123", sub: "user-123", email: "test@example.com", role: "CUSTOMER" };
     const token = signToken(payload);
     
     mockReq.headers = {
@@ -31,6 +31,7 @@ describe("auth.middleware.ts - requireAuth", () => {
     expect(nextFunction).toHaveBeenCalled();
     expect((mockReq as any).user).toBeDefined();
     expect((mockReq as any).user.id).toBe("user-123");
+    expect((mockReq as any).user.sub).toBe("user-123");
     expect((mockReq as any).user.role).toBe("CUSTOMER");
   });
 

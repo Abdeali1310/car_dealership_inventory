@@ -149,3 +149,59 @@ describe("POST /api/auth/login", () => {
     expect(res.body.message).toBe("Invalid credentials");
   });
 });
+
+describe("GET /api/auth/me", () => {
+  let token: string;
+
+  beforeEach(async () => {
+    // Register a user
+    await request(app)
+      .post("/api/auth/register")
+      .send({
+        email: "me_test@example.com",
+        password: "password123",
+        fullName: "Me Test User",
+      });
+
+    // Login to get token
+    const res = await request(app)
+      .post("/api/auth/login")
+      .send({
+        email: "me_test@example.com",
+        password: "password123",
+      });
+
+    token = res.body.data.token;
+  });
+
+  it("should return the current user object when given a valid token", async () => {
+    const res = await request(app)
+      .get("/api/auth/me")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data).toBeDefined();
+    expect(res.body.data.email).toBe("me_test@example.com");
+    expect(res.body.data.fullName).toBe("Me Test User");
+    expect(res.body.data.password).toBeUndefined(); // Must not include password!
+  });
+
+  it("should return 401 when no token is provided", async () => {
+    const res = await request(app).get("/api/auth/me");
+
+    expect(res.status).toBe(401);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("No token provided");
+  });
+
+  it("should return 401 when token is invalid", async () => {
+    const res = await request(app)
+      .get("/api/auth/me")
+      .set("Authorization", "Bearer invalid-token");
+
+    expect(res.status).toBe(401);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("Invalid or expired token");
+  });
+});
