@@ -1,5 +1,6 @@
-import { createVehicle, getAllVehicles, searchVehicles } from "../../src/modules/vehicles/vehicles.service";
+import { createVehicle, getAllVehicles, searchVehicles, updateVehicle } from "../../src/modules/vehicles/vehicles.service";
 import prisma from "../../src/lib/prisma";
+import { ApiError } from "../../src/utils/ApiError";
 
 describe("vehicles.service.ts - createVehicle", () => {
   it("should create a vehicle and return it with all the fields", async () => {
@@ -128,5 +129,58 @@ describe("vehicles.service.ts - searchVehicles", () => {
   it("should return all vehicles if no filters are provided", async () => {
     const results = await searchVehicles({});
     expect(results.length).toBe(3);
+  });
+});
+
+describe("vehicles.service.ts - updateVehicle", () => {
+  let vehicleId: string;
+
+  beforeEach(async () => {
+    const vehicle = await createVehicle({
+      make: "Chevrolet",
+      model: "Corvette",
+      category: "COUPE" as const,
+      price: 65000.00,
+      quantity: 1,
+    });
+    vehicleId = vehicle.id;
+  });
+
+  it("should update the given fields of the vehicle", async () => {
+    const updated = await updateVehicle(vehicleId, {
+      price: 68000.00,
+      quantity: 2,
+      description: "Updated sports car",
+    });
+
+    expect(updated).toBeDefined();
+    expect(updated.id).toBe(vehicleId);
+    expect(Number(updated.price)).toBe(68000.00);
+    expect(updated.quantity).toBe(2);
+    expect(updated.description).toBe("Updated sports car");
+    // Unchanged fields should remain the same
+    expect(updated.make).toBe("Chevrolet");
+    expect(updated.model).toBe("Corvette");
+
+    // Double check database record
+    const dbVehicle = await prisma.vehicle.findUnique({
+      where: { id: vehicleId },
+    });
+    expect(dbVehicle).toBeDefined();
+    expect(Number(dbVehicle?.price)).toBe(68000.00);
+  });
+
+  it("should throw a 404 ApiError if the vehicle doesn't exist", async () => {
+    await expect(
+      updateVehicle("non-existent-id", { price: 50000 })
+    ).rejects.toThrow(ApiError);
+
+    try {
+      await updateVehicle("non-existent-id", { price: 50000 });
+      fail("Should have thrown an error");
+    } catch (error: any) {
+      expect(error.statusCode).toBe(404);
+      expect(error.message).toBe("Vehicle not found");
+    }
   });
 });

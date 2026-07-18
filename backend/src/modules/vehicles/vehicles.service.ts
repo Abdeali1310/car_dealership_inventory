@@ -83,3 +83,7 @@ export async function searchVehicles(filters: SearchFilters): Promise<any[]> {
 
   return vehicles;
 }
+
+export async function updateVehicle(id: string, data: Partial<CreateVehicleInput>): Promise<any> {
+  throw new Error("Not implemented");
+}
