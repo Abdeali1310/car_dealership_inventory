@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { Car, Loader2 } from "lucide-react";
+import { Car, Loader2, Mail, Lock, Eye, EyeOff } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -17,6 +17,9 @@ const Login: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [serverError, setServerError] = useState<string | null>(null);
+
+  // State for toggling password visibility
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -56,27 +59,42 @@ const Login: React.FC = () => {
             </div>
           )}
 
+          {/* Email Address */}
           <div className="flex flex-col gap-1">
             <label className="text-[12px] font-medium text-text-secondary">Email Address</label>
-            <input
-              type="email"
-              {...register("email")}
-              className="h-[38px] px-3 border border-border-strong rounded-standard text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent text-[14px]"
-              placeholder="john@example.com"
-            />
+            <div className="relative flex items-center">
+              <Mail className="absolute left-3 w-4 h-4 text-text-muted" />
+              <input
+                type="email"
+                {...register("email")}
+                className="h-[38px] w-full pl-9 pr-3 border border-border-strong rounded-standard text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent text-[14px]"
+                placeholder="john@example.com"
+              />
+            </div>
             {errors.email && (
               <span className="text-status-critical text-[12px] mt-0.5">{errors.email.message}</span>
             )}
           </div>
 
+          {/* Password */}
           <div className="flex flex-col gap-1">
             <label className="text-[12px] font-medium text-text-secondary">Password</label>
-            <input
-              type="password"
-              {...register("password")}
-              className="h-[38px] px-3 border border-border-strong rounded-standard text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent text-[14px]"
-              placeholder="••••••••"
-            />
+            <div className="relative flex items-center">
+              <Lock className="absolute left-3 w-4 h-4 text-text-muted" />
+              <input
+                type={showPassword ? "text" : "password"}
+                {...register("password")}
+                className="h-[38px] w-full pl-9 pr-10 border border-border-strong rounded-standard text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent text-[14px]"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-3 text-text-muted hover:text-text-secondary focus:outline-none cursor-pointer"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
             {errors.password && (
               <span className="text-status-critical text-[12px] mt-0.5">{errors.password.message}</span>
             )}
@@ -99,8 +117,9 @@ const Login: React.FC = () => {
         </form>
 
         <div className="mt-6 pt-4 border-t border-border flex justify-center">
+          <p className="text-text-secondary text-[14px] mr-2">Don't have an account?</p>
           <Link to="/register" className="text-brand hover:text-brand-hover text-[14px] font-medium transition-colors">
-            Don't have an account? Sign Up
+            Sign Up
           </Link>
         </div>
       </div>
