@@ -93,7 +93,7 @@ const VehicleTable: React.FC<VehicleTableProps> = ({
                   {formatCurrency(Number(vehicle.price))}
                 </td>
                 <td className="py-3 px-3.5">
-                  <Badge variant={variant} label={label} />
+                  <Badge variant={variant} label={`${label} (${vehicle.quantity})`} />
                 </td>
                 <td className="py-3 px-3.5 text-right pr-4">
                   {user?.role === "CUSTOMER" && onPurchase && (
