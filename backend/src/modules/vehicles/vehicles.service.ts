@@ -103,3 +103,7 @@ export async function updateVehicle(id: string, data: Partial<CreateVehicleInput
 
   return updatedVehicle;
 }
+
+export async function deleteVehicle(id: string): Promise<any> {
+  throw new Error("Not implemented");
+}

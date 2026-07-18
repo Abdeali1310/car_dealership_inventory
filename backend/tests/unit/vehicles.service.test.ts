@@ -1,4 +1,4 @@
-import { createVehicle, getAllVehicles, searchVehicles, updateVehicle } from "../../src/modules/vehicles/vehicles.service";
+import { createVehicle, getAllVehicles, searchVehicles, updateVehicle, deleteVehicle } from "../../src/modules/vehicles/vehicles.service";
 import prisma from "../../src/lib/prisma";
 import { ApiError } from "../../src/utils/ApiError";
 
@@ -177,6 +177,48 @@ describe("vehicles.service.ts - updateVehicle", () => {
 
     try {
       await updateVehicle("non-existent-id", { price: 50000 });
+      fail("Should have thrown an error");
+    } catch (error: any) {
+      expect(error.statusCode).toBe(404);
+      expect(error.message).toBe("Vehicle not found");
+    }
+  });
+});
+
+describe("vehicles.service.ts - deleteVehicle", () => {
+  let vehicleId: string;
+
+  beforeEach(async () => {
+    const vehicle = await createVehicle({
+      make: "Jeep",
+      model: "Wrangler",
+      category: "SUV" as const,
+      price: 42000.00,
+      quantity: 3,
+    });
+    vehicleId = vehicle.id;
+  });
+
+  it("should delete the vehicle row from the database", async () => {
+    const deleted = await deleteVehicle(vehicleId);
+
+    expect(deleted).toBeDefined();
+    expect(deleted.id).toBe(vehicleId);
+
+    // Verify it is gone from the database
+    const dbVehicle = await prisma.vehicle.findUnique({
+      where: { id: vehicleId },
+    });
+    expect(dbVehicle).toBeNull();
+  });
+
+  it("should throw a 404 ApiError if the vehicle to delete doesn't exist", async () => {
+    await expect(
+      deleteVehicle("non-existent-id")
+    ).rejects.toThrow(ApiError);
+
+    try {
+      await deleteVehicle("non-existent-id");
       fail("Should have thrown an error");
     } catch (error: any) {
       expect(error.statusCode).toBe(404);
