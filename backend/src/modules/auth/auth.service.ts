@@ -2,6 +2,15 @@ import bcrypt from "bcrypt";
 import prisma from "../../lib/prisma";
 
 export async function registerUser(email: string, password: string, fullName: string): Promise<any> {
+  // Check if email is already registered
+  const existingUser = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (existingUser) {
+    throw new Error("Email already registered");
+  }
+
   // Hash the password with 10 salt rounds
   const hashedPassword = await bcrypt.hash(password, 10);
   
