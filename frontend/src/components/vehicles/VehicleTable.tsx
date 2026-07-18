@@ -17,14 +17,20 @@ export interface Vehicle {
 
 interface VehicleTableProps {
   vehicles: Vehicle[];
-  onPurchase: (id: string) => void;
-  purchasingId: string | null;
+  onPurchase?: (id: string) => void;
+  purchasingId?: string | null;
+  onEdit?: (vehicle: Vehicle) => void;
+  onDelete?: (vehicle: Vehicle) => void;
+  deletingId?: string | null;
 }
 
 const VehicleTable: React.FC<VehicleTableProps> = ({
   vehicles,
   onPurchase,
-  purchasingId,
+  purchasingId = null,
+  onEdit,
+  onDelete,
+  deletingId = null,
 }) => {
   const { user } = useAuth();
 
@@ -56,7 +62,7 @@ const VehicleTable: React.FC<VehicleTableProps> = ({
             <th className="py-2.5 px-3.5 text-[12px] font-medium text-text-secondary uppercase tracking-[0.02em] w-[140px]">
               Status
             </th>
-            <th className="py-2.5 px-3.5 text-[12px] font-medium text-text-secondary uppercase tracking-[0.02em] text-right w-[150px]">
+            <th className="py-2.5 px-3.5 text-[12px] font-medium text-text-secondary uppercase tracking-[0.02em] text-right w-[180px]">
               Actions
             </th>
           </tr>
@@ -88,7 +94,7 @@ const VehicleTable: React.FC<VehicleTableProps> = ({
                   <Badge variant={variant} label={label} />
                 </td>
                 <td className="py-3 px-3.5 text-right pr-4">
-                  {user?.role === "CUSTOMER" && (
+                  {user?.role === "CUSTOMER" && onPurchase && (
                     <button
                       onClick={() => onPurchase(vehicle.id)}
                       disabled={isOutOfStock || isPNode}
@@ -109,9 +115,36 @@ const VehicleTable: React.FC<VehicleTableProps> = ({
                     </button>
                   )}
                   {user?.role === "ADMIN" && (
-                    <span className="text-[12px] text-text-secondary italic pr-2">
-                      Admin View
-                    </span>
+                    <div className="flex justify-end gap-2">
+                      {onEdit && (
+                        <button
+                          type="button"
+                          onClick={() => onEdit(vehicle)}
+                          className="h-[32px] px-3 rounded-standard border border-border-strong text-text-secondary hover:text-text-primary hover:bg-bg-hover text-[12px] font-medium transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
+                        >
+                          Edit
+                        </button>
+                      )}
+                      {onDelete && (
+                        <button
+                          type="button"
+                          onClick={() => onDelete(vehicle)}
+                          disabled={deletingId === vehicle.id}
+                          className="h-[32px] px-3 rounded-standard bg-status-critical hover:bg-[#b82319] text-white text-[12px] font-medium transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-status-critical focus:border-transparent"
+                        >
+                          {deletingId === vehicle.id ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            "Delete"
+                          )}
+                        </button>
+                      )}
+                      {!onEdit && !onDelete && (
+                        <span className="text-[12px] text-text-secondary italic pr-2">
+                          Admin View
+                        </span>
+                      )}
+                    </div>
                   )}
                 </td>
               </tr>
