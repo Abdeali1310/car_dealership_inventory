@@ -21,12 +21,12 @@ function App() {
             <Route
               path="/"
               element={
-                <>
+                <div className="min-h-screen bg-bg-secondary flex flex-col pb-12">
                   <Navbar />
-                  <main className="max-w-[1200px] mx-auto">
+                  <main className="max-w-[1200px] mx-auto w-full flex-grow px-4 sm:px-6">
                     <Dashboard />
                   </main>
-                </>
+                </div>
               }
             />
           </Route>
@@ -35,12 +35,12 @@ function App() {
             <Route
               path="/admin/vehicles"
               element={
-                <>
+                <div className="min-h-screen bg-bg-secondary flex flex-col pb-12">
                   <Navbar />
-                  <main className="max-w-[1200px] mx-auto">
+                  <main className="max-w-[1200px] mx-auto w-full flex-grow px-4 sm:px-6">
                     <ManageVehicles />
                   </main>
-                </>
+                </div>
               }
             />
           </Route>

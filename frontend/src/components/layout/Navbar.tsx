@@ -15,7 +15,7 @@ const Navbar: React.FC = () => {
   if (!user) return null;
 
   return (
-    <nav className="h-[60px] bg-bg-secondary border-b border-border px-4 sm:px-6 flex items-center justify-between font-sans">
+    <nav className="h-[60px] bg-bg-primary border-b border-border px-4 sm:px-6 flex items-center justify-between font-sans">
       <div className="flex items-center gap-4 sm:gap-8">
         <Link to="/" className="flex items-center gap-2 font-semibold text-text-primary text-[15px] sm:text-[16px] flex-shrink-0">
           <Car className="w-4 h-4 text-brand flex-shrink-0" />

@@ -5,13 +5,13 @@
   color-scheme: light;
   
   --bg-primary: #FFFFFF;
-  --bg-secondary: #F6F7F9;
-  --bg-hover: #EEF1F4;
-  --border: #E2E5EA;
-  --border-strong: #C7CCD3;
-  --text-primary: #16181D;
-  --text-secondary: #5B6472;
-  --text-muted: #8A93A1;
+  --bg-secondary: #F8F9FA;
+  --bg-hover: #F1F3F5;
+  --border: #E9ECEF;
+  --border-strong: #CED4DA;
+  --text-primary: #212529;
+  --text-secondary: #495057;
+  --text-muted: #868E96;
 
   --brand: #1B5FBF;
   --brand-hover: #174F9E;
@@ -21,11 +21,11 @@
   --status-warning-text: #B58A00;
   --status-warning-bg: #F5C518;
   --status-critical: #D93025;
-  --status-neutral: #8A93A1;
+  --status-neutral: #868E96;
 
   --accent: #F97316;
   --accent-hover: #EA580C;
-  --card-photo-bg: linear-gradient(135deg, #FDE8E8, #FDF0E4);
+  --card-photo-bg: linear-gradient(135deg, #F1F3F5, #E9ECEF);
 
   --radius: 6px;
   --radius-pill: 999px;
@@ -65,8 +65,8 @@
 }
 
 html, body {
-  background-color: #FFFFFF !important;
-  color: #16181D !important;
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
   font-family: var(--font-sans);
   font-size: 14px;
   margin: 0;

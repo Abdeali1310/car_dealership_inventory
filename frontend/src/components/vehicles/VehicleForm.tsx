@@ -245,9 +245,9 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
             <label className="text-[12px] font-medium text-text-secondary">Vehicle Image</label>
             <div className="flex items-center gap-4 p-3 border border-border rounded-standard bg-bg-secondary">
               {/* Preview Thumbnail */}
-              <div className="w-14 h-14 rounded-standard border border-border-strong overflow-hidden flex items-center justify-center flex-shrink-0 select-none bg-card-photo-bg text-3xl">
+              <div className="w-28 h-20 rounded-standard border border-border-strong overflow-hidden flex items-center justify-center flex-shrink-0 select-none bg-card-photo-bg text-4xl">
                 {visual.type === "image" && visual.url ? (
-                  <img src={visual.url} alt="Vehicle preview" className="w-full h-full object-cover" />
+                  <img src={visual.url} alt="Vehicle preview" className="w-full h-full object-contain p-1" />
                 ) : (
                   <span>{visual.icon}</span>
                 )}

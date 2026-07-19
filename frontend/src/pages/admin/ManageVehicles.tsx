@@ -169,8 +169,8 @@ const ManageVehicles: React.FC = () => {
         /* Card skeleton grid */
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-pulse">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((idx) => (
-            <div key={idx} className="border border-border rounded-standard overflow-hidden bg-bg-secondary flex flex-col h-[370px]">
-              <div className="h-[210px] bg-bg-hover" />
+            <div key={idx} className="border border-border rounded-standard overflow-hidden bg-bg-primary flex flex-col h-[340px]">
+              <div className="h-[180px] bg-bg-secondary" />
               <div className="p-4 flex flex-col gap-3 flex-grow">
                 <div className="h-5 bg-bg-hover rounded-standard w-3/4" />
                 <div className="h-3 bg-bg-hover rounded-standard w-1/4" />

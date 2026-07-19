@@ -59,15 +59,14 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
       {/* Photo / Emoji Header Area */}
       <div
         onClick={() => visual.type === "image" && visual.url && setIsPreviewOpen(true)}
-        className={`h-[180px] bg-card-photo-bg flex items-center justify-center overflow-hidden relative border-b border-border select-none ${
-          visual.type === "image" && visual.url ? "cursor-zoom-in" : ""
-        }`}
+        className={`h-[180px] bg-card-photo-bg flex items-center justify-center overflow-hidden relative border-b border-border select-none ${visual.type === "image" && visual.url ? "cursor-zoom-in" : ""
+          }`}
       >
         {visual.type === "image" && visual.url ? (
           <img
             src={visual.url}
             alt={`${vehicle.make} ${vehicle.model}`}
-            className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+            className="w-full h-full object-contain p-2 transition-transform duration-300 hover:scale-105"
             loading="lazy"
           />
         ) : (
@@ -110,11 +109,10 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
             type="button"
             onClick={() => onPurchase(vehicle.id)}
             disabled={isOutOfStock || isPurchasing}
-            className={`w-full h-[38px] rounded-standard text-[13px] font-semibold transition-all focus:ring-2 focus:outline-none cursor-pointer flex items-center justify-center gap-1.5 ${
-              isOutOfStock
+            className={`w-full h-[38px] rounded-standard text-[13px] font-semibold transition-all focus:ring-2 focus:outline-none cursor-pointer flex items-center justify-center gap-1.5 ${isOutOfStock
                 ? "bg-bg-secondary text-text-muted cursor-not-allowed border border-border"
                 : "bg-accent hover:bg-accent-hover text-white focus:ring-accent"
-            }`}
+              }`}
           >
             {isPurchasing ? (
               <>
@@ -144,7 +142,7 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
                 type="button"
                 onClick={() => onEdit(vehicle)}
                 title="Edit Details"
-                className="w-[34px] h-[34px] rounded-standard border border-border-strong text-text-secondary hover:text-text-primary hover:bg-bg-hover text-[14px] flex items-center justify-center flex-shrink-0 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
+                className="w-[34px] h-[34px] rounded-standard text-text-secondary hover:text-text-primary hover:bg-bg-hover text-[14px] flex items-center justify-center flex-shrink-0 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
               >
                 ✏️
               </button>
@@ -155,7 +153,7 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
                 onClick={() => onDelete(vehicle)}
                 disabled={isDeleting}
                 title="Delete Vehicle"
-                className="w-[34px] h-[34px] rounded-standard bg-status-critical hover:bg-[#b82319] text-white text-[14px] flex items-center justify-center flex-shrink-0 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-status-critical focus:border-transparent"
+                className="w-[34px] h-[34px] rounded-standard text-text-secondary hover:text-status-critical hover:bg-bg-hover text-[14px] flex items-center justify-center flex-shrink-0 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-status-critical focus:border-transparent"
               >
                 {isDeleting ? (
                   <Loader2 className="w-3 h-3 animate-spin" />
