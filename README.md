@@ -2,6 +2,8 @@
 
 DriveDealer is a full-stack web application designed for managing car dealership inventory, user authentication, and purchasing transactions. It provides a role-based environment where customers can view, search, and purchase vehicles, while administrators can perform CRUD operations on vehicles, restock items, and track live stock metrics.
 
+**Live Application URL:** [https://drive-dealership-sand.vercel.app/](https://drive-dealership-sand.vercel.app/)
+
 ---
 
 ## Table of Contents
@@ -445,10 +447,4 @@ Used to generate the whole architecture, design, and task breakdown for the proj
 GitHub Copilot assisted during the implementation of standard frontend components. It provided autocompletion suggestions for form controllers, input layouts, and validation handlers, accelerating repetitive tasks.
 
 
-### ChatGPT
-Helped me writing prompts and commit messages
 ---
-
-## License
-
-This project is licensed under the MIT License.

@@ -17,7 +17,12 @@ const CATEGORY_EMOJIS: Record<string, string> = {
 
 export function getVehicleVisual(vehicle: { imageUrl?: string | null; category: string }): VisualSource {
   if (vehicle.imageUrl && vehicle.imageUrl.trim() !== "") {
-    return { type: "image", url: vehicle.imageUrl };
+    let url = vehicle.imageUrl;
+    if (url.startsWith("/uploads/")) {
+      const backendDomain = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace("/api", "");
+      url = `${backendDomain}${url}`;
+    }
+    return { type: "image", url };
   }
 
   const icon = CATEGORY_EMOJIS[vehicle.category.toUpperCase()] || "🚗";

@@ -4,11 +4,14 @@ import authRoutes from "./modules/auth/auth.routes";
 import vehiclesRoutes from "./modules/vehicles/vehicles.routes";
 import { errorHandler } from "./middleware/error.middleware";
 
+import path from "path";
+
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 // Routes
 app.use("/api/auth", authRoutes);
