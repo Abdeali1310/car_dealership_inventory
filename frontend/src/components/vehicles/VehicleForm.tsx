@@ -24,10 +24,16 @@ const vehicleFormSchema = z.object({
   model: z.string().min(1, "Model is required"),
   category: z.enum(
     ["SEDAN", "SUV", "TRUCK", "COUPE", "HATCHBACK", "CONVERTIBLE", "VAN", "MOTORCYCLE"],
-    { required_error: "Category is required" }
+    { message: "Category is required" }
   ),
-  price: z.coerce.number().positive("Price must be a positive number"),
-  quantity: z.coerce.number().int().nonnegative("Quantity must be a non-negative integer"),
+  price: z.preprocess(
+    (val) => (val === "" || val === null || val === undefined ? undefined : Number(val)),
+    z.number({ message: "Price must be a positive number" }).positive("Price must be a positive number")
+  ),
+  quantity: z.preprocess(
+    (val) => (val === "" || val === null || val === undefined ? undefined : Number(val)),
+    z.number({ message: "Quantity must be a non-negative integer" }).int().nonnegative("Quantity must be a non-negative integer")
+  ),
   description: z.string().optional(),
   imageUrl: z.string().optional().or(z.literal("")),
 });
@@ -56,7 +62,7 @@ const VehicleForm: React.FC<VehicleFormProps> = ({
     setValue,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm<VehicleFormInput>({
+  } = useForm({
     resolver: zodResolver(vehicleFormSchema),
     defaultValues: {
       make: initialData?.make || "",
