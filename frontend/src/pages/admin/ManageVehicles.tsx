@@ -33,7 +33,7 @@ const ManageVehicles: React.FC = () => {
       clearTimeout(handler);
     };
   }, [filters]);
-  
+
   // Delete dialog state
   const [vehicleToDelete, setVehicleToDelete] = useState<Vehicle | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -125,6 +125,43 @@ const ManageVehicles: React.FC = () => {
         </button>
       </div>
 
+      {/* KPI Cards Grid */}
+      {isLoading ? (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
+          {[1, 2, 3, 4].map((idx) => (
+            <div key={idx} className="border border-border rounded-standard p-4 bg-bg-primary flex flex-col gap-2 h-[80px]">
+              <div className="h-3 bg-bg-hover rounded-standard w-1/2" />
+              <div className="h-6 bg-bg-hover rounded-standard w-1/4 mt-1" />
+            </div>
+          ))}
+        </div>
+      ) : vehicles ? (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-bg-primary border border-border rounded-standard p-4 flex flex-col gap-1 shadow-sm">
+            <span className="text-[10px] sm:text-[11px] font-bold text-text-muted uppercase tracking-wider">Total Vehicles</span>
+            <span className="text-2xl font-bold text-text-primary">{vehicles.length}</span>
+          </div>
+          <div className="bg-bg-primary border border-border rounded-standard p-4 flex flex-col gap-1 shadow-sm">
+            <span className="text-[10px] sm:text-[11px] font-bold text-text-muted uppercase tracking-wider">Low Stock</span>
+            <span className="text-2xl font-bold text-status-warning-text">
+              {vehicles.filter((v) => v.quantity > 0 && v.quantity <= 3).length}
+            </span>
+          </div>
+          <div className="bg-bg-primary border border-border rounded-standard p-4 flex flex-col gap-1 shadow-sm">
+            <span className="text-[10px] sm:text-[11px] font-bold text-text-muted uppercase tracking-wider">Out of Stock</span>
+            <span className="text-2xl font-bold text-status-critical">
+              {vehicles.filter((v) => v.quantity === 0).length}
+            </span>
+          </div>
+          <div className="bg-bg-primary border border-border rounded-standard p-4 flex flex-col gap-1 shadow-sm">
+            <span className="text-[10px] sm:text-[11px] font-bold text-text-muted uppercase tracking-wider">Categories</span>
+            <span className="text-2xl font-bold text-brand">
+              {new Set(vehicles.map((v) => v.category)).size}
+            </span>
+          </div>
+        </div>
+      ) : null}
+
       {/* Search & Filter Bar */}
       <SearchFilterBar filters={filters} onChange={setFilters} />
 
@@ -132,8 +169,8 @@ const ManageVehicles: React.FC = () => {
         /* Card skeleton grid */
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-pulse">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((idx) => (
-            <div key={idx} className="border border-border rounded-standard overflow-hidden bg-bg-primary flex flex-col h-[340px]">
-              <div className="h-[180px] bg-bg-secondary" />
+            <div key={idx} className="border border-border rounded-standard overflow-hidden bg-bg-secondary flex flex-col h-[370px]">
+              <div className="h-[210px] bg-bg-hover" />
               <div className="p-4 flex flex-col gap-3 flex-grow">
                 <div className="h-5 bg-bg-hover rounded-standard w-3/4" />
                 <div className="h-3 bg-bg-hover rounded-standard w-1/4" />
