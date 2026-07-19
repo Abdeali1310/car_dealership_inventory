@@ -1,15 +1,16 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import VehicleCard from "./VehicleCard";
 import type { Vehicle } from "./VehicleTable";
 
+let mockRole = "CUSTOMER";
+
 // Mock AuthContext
 vi.mock("../../context/AuthContext", () => ({
   useAuth: () => ({
-    user: { role: "CUSTOMER", fullName: "Test Customer" },
+    user: { role: mockRole, fullName: "Test User" },
   }),
 }));
-
 
 const mockVehicleWithImage: Vehicle = {
   id: "1",
@@ -34,6 +35,10 @@ const mockVehicleWithEmoji: Vehicle = {
 };
 
 describe("VehicleCard Component", () => {
+  beforeEach(() => {
+    mockRole = "CUSTOMER";
+  });
+
   it("should render vehicle details correctly", () => {
     render(
       <VehicleCard
@@ -46,7 +51,6 @@ describe("VehicleCard Component", () => {
     expect(screen.getByText("Porsche 911 Carrera")).toBeInTheDocument();
     expect(screen.getByText("COUPE")).toBeInTheDocument();
     expect(screen.getByText("A fast sports car.")).toBeInTheDocument();
-    // Price formatted in INR (en-IN)
     expect(screen.getByText(/₹1,80,00,000/)).toBeInTheDocument();
   });
 
@@ -73,9 +77,7 @@ describe("VehicleCard Component", () => {
       />
     );
 
-    // Should render SUV emoji fallback "🚙"
     expect(screen.getByText("🚙")).toBeInTheDocument();
-    // Should not render an image element
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
   });
 
@@ -113,12 +115,81 @@ describe("VehicleCard Component", () => {
     render(
       <VehicleCard
         vehicle={mockVehicleWithImage}
-        onPurchase={vi.fn()}
+        onPurchase={handlePurchase => {}}
         isPurchasing={true}
       />
     );
 
     const button = screen.getByRole("button", { name: /buying/i });
     expect(button).toBeDisabled();
+  });
+
+  it("should open Lightbox Modal when car image is clicked and close it on trigger", () => {
+    const { container } = render(
+      <VehicleCard
+        vehicle={mockVehicleWithImage}
+        onPurchase={vi.fn()}
+        isPurchasing={false}
+      />
+    );
+
+    const imgHeader = container.querySelector(".cursor-zoom-in");
+    expect(imgHeader).toBeInTheDocument();
+
+    // Before click, only 1 instance of the title
+    expect(screen.getAllByText("Porsche 911 Carrera")).toHaveLength(1);
+
+    // Click image to open Lightbox
+    fireEvent.click(imgHeader!);
+    // Now there should be 2 instances of the title (one in card, one in lightbox header)
+    expect(screen.getAllByText("Porsche 911 Carrera")).toHaveLength(2);
+
+    // Click close button to close Lightbox
+    const closeBtn = screen.getByRole("button", { name: "" }); // Lucide X close button has no text
+    expect(closeBtn).toBeInTheDocument();
+    fireEvent.click(closeBtn);
+    
+    // After close, only 1 instance of the title remains
+    expect(screen.getAllByText("Porsche 911 Carrera")).toHaveLength(1);
+  });
+
+  it("should render ADMIN actions and trigger click handlers", () => {
+    mockRole = "ADMIN";
+    const handleEdit = vi.fn();
+    const handleDelete = vi.fn();
+    const handleRestock = vi.fn();
+
+    render(
+      <VehicleCard
+        vehicle={mockVehicleWithImage}
+        onPurchase={vi.fn()}
+        isPurchasing={false}
+        isAdminMode={true}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onRestock={handleRestock}
+      />
+    );
+
+    // Purchase button should be hidden for admin
+    expect(screen.queryByRole("button", { name: /purchase/i })).not.toBeInTheDocument();
+
+    // Restock button should be present
+    const restockBtn = screen.getByRole("button", { name: /restock/i });
+    expect(restockBtn).toBeInTheDocument();
+    fireEvent.click(restockBtn);
+    expect(handleRestock).toHaveBeenCalledWith(mockVehicleWithImage);
+
+    // Edit button (pencil emoji)
+    const editBtn = screen.getByRole("button", { name: /✏️/ });
+    expect(editBtn).toBeInTheDocument();
+    fireEvent.click(editBtn);
+    expect(handleEdit).toHaveBeenCalledWith(mockVehicleWithImage);
+
+    // Delete button (trash emoji)
+    const deleteBtn = screen.getByRole("button", { name: /🗑️/ });
+    expect(deleteBtn).toBeInTheDocument();
+    fireEvent.click(deleteBtn);
+    expect(handleDelete).toHaveBeenCalledWith(mockVehicleWithImage);
   });
 });

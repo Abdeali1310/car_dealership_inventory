@@ -10,7 +10,6 @@ describe("Badge Component", () => {
 
   it("should render a dot for success variant", () => {
     const { container } = render(<Badge variant="success" label="Active" />);
-    // Check if the success dot class is present
     const dot = container.querySelector(".bg-status-success");
     expect(dot).toBeInTheDocument();
   });
@@ -23,8 +22,13 @@ describe("Badge Component", () => {
 
   it("should NOT render a dot for neutral variant", () => {
     const { container } = render(<Badge variant="neutral" label="Info" />);
-    // Dot shouldn't be rendered, so there should only be the main text span
     const dot = container.querySelector(".rounded-pill.w-1\\.5");
     expect(dot).not.toBeInTheDocument();
+  });
+
+  it("should render correctly for brand variant", () => {
+    const { container } = render(<Badge variant="brand" label="Brand Name" />);
+    const span = container.querySelector(".text-brand");
+    expect(span).toBeInTheDocument();
   });
 });

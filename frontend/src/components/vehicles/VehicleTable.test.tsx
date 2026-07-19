@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import VehicleTable from "./VehicleTable";
 
 // Define a mutable role variable for dynamic role switching
@@ -37,7 +37,7 @@ describe("VehicleTable Component", () => {
     mockRole = "CUSTOMER";
   });
 
-  it("should render purchase buttons for customer role", () => {
+  it("should render purchase buttons for customer role and call onPurchase", () => {
     const handlePurchase = vi.fn();
     render(<VehicleTable vehicles={mockVehicles} onPurchase={handlePurchase} />);
 
@@ -48,6 +48,10 @@ describe("VehicleTable Component", () => {
     // Check purchase buttons
     const buttons = screen.getAllByRole("button", { name: /purchase/i });
     expect(buttons).toHaveLength(2);
+
+    // Click the active purchase button (Honda Civic)
+    fireEvent.click(buttons[0]);
+    expect(handlePurchase).toHaveBeenCalledWith("1");
   });
 
   it("should disable the purchase button when quantity is 0", () => {
@@ -64,7 +68,7 @@ describe("VehicleTable Component", () => {
     expect(camryButton).toBeDisabled();
   });
 
-  it("should render Restock, Edit, and Delete controls for admin role, hiding Purchase options", () => {
+  it("should render Restock, Edit, and Delete controls for admin role, hiding Purchase options and triggers callbacks", () => {
     // Switch role to ADMIN for this test case
     mockRole = "ADMIN";
 
@@ -88,11 +92,17 @@ describe("VehicleTable Component", () => {
     // Should render Edit, Delete, and Restock buttons for every vehicle
     const editButtons = screen.getAllByRole("button", { name: /edit/i });
     expect(editButtons).toHaveLength(2);
+    fireEvent.click(editButtons[0]);
+    expect(handleEdit).toHaveBeenCalledWith(mockVehicles[0]);
 
     const deleteButtons = screen.getAllByRole("button", { name: /delete/i });
     expect(deleteButtons).toHaveLength(2);
+    fireEvent.click(deleteButtons[0]);
+    expect(handleDelete).toHaveBeenCalledWith(mockVehicles[0]);
 
     const restockButtons = screen.getAllByRole("button", { name: /restock/i });
     expect(restockButtons).toHaveLength(2);
+    fireEvent.click(restockButtons[0]);
+    expect(handleRestock).toHaveBeenCalledWith(mockVehicles[0]);
   });
 });
