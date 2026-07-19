@@ -18,7 +18,8 @@ const CATEGORY_EMOJIS: Record<string, string> = {
 export function getVehicleVisual(vehicle: { imageUrl?: string | null; category: string }): VisualSource {
   if (vehicle.imageUrl && vehicle.imageUrl.trim() !== "") {
     let url = vehicle.imageUrl;
-    if (url.startsWith("/uploads/")) {
+    // Only prepend backend domain for dynamically uploaded files (containing timestamp hyphen suffix)
+    if (url.startsWith("/uploads/") && /\d+-\d+/.test(url)) {
       const backendDomain = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace("/api", "");
       url = `${backendDomain}${url}`;
     }
