@@ -115,7 +115,7 @@ describe("VehicleCard Component", () => {
     render(
       <VehicleCard
         vehicle={mockVehicleWithImage}
-        onPurchase={handlePurchase => {}}
+        onPurchase={vi.fn()}
         isPurchasing={true}
       />
     );
@@ -164,7 +164,6 @@ describe("VehicleCard Component", () => {
         vehicle={mockVehicleWithImage}
         onPurchase={vi.fn()}
         isPurchasing={false}
-        isAdminMode={true}
         onEdit={handleEdit}
         onDelete={handleDelete}
         onRestock={handleRestock}
