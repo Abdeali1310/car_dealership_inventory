@@ -46,4 +46,3 @@ frontend/.vite/
 # prisma/client/
 
 uploads/
-seed.ts
