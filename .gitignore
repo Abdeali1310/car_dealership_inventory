@@ -45,4 +45,5 @@ frontend/.vite/
 # Prisma (Generated Client)
 # prisma/client/
 
-uploads/
+/backend/uploads/
+!frontend/public/uploads/
