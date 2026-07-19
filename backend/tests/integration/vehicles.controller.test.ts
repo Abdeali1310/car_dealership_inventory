@@ -192,6 +192,18 @@ describe("GET /api/vehicles/search", () => {
     expect(res.body.data[0].make).toBe("Ford");
   });
 
+  it("should allow searching by model and category", async () => {
+    const res = await request(app)
+      .get("/api/vehicles/search")
+      .set("Authorization", `Bearer ${customerToken}`)
+      .query({ model: "Civic", category: "SEDAN" });
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.length).toBe(1);
+    expect(res.body.data[0].make).toBe("Honda");
+  });
+
   it("should deny access with 401 Unauthorized when no token is provided", async () => {
     const res = await request(app)
       .get("/api/vehicles/search")
@@ -570,5 +582,58 @@ describe("POST /api/vehicles/:id/restock", () => {
     expect(res.status).toBe(404);
     expect(res.body.success).toBe(false);
     expect(res.body.message).toBe("Vehicle not found");
+  });
+});
+
+describe("POST /api/vehicles/upload", () => {
+  let adminToken: string;
+  let customerToken: string;
+
+  beforeEach(() => {
+    adminToken = signToken({
+      id: "admin-id-123",
+      sub: "admin-id-123",
+      email: "admin_test@example.com",
+      role: "ADMIN",
+    });
+
+    customerToken = signToken({
+      id: "customer-id-123",
+      sub: "customer-id-123",
+      email: "customer_test@example.com",
+      role: "CUSTOMER",
+    });
+  });
+
+  it("should allow an ADMIN to upload an image successfully and return 200", async () => {
+    const res = await request(app)
+      .post("/api/vehicles/upload")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .attach("file", Buffer.from("dummy image content"), "test-car.png");
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data).toBeDefined();
+    expect(res.body.data.url).toMatch(/^\/uploads\/\d+-\d+\.png$/);
+  });
+
+  it("should deny upload with 403 Forbidden when user is a CUSTOMER", async () => {
+    const res = await request(app)
+      .post("/api/vehicles/upload")
+      .set("Authorization", `Bearer ${customerToken}`)
+      .attach("file", Buffer.from("dummy image content"), "test-car.png");
+
+    expect(res.status).toBe(403);
+    expect(res.body.success).toBe(false);
+  });
+
+  it("should return 400 if no file is uploaded", async () => {
+    const res = await request(app)
+      .post("/api/vehicles/upload")
+      .set("Authorization", `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(400);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("No file uploaded");
   });
 });
