@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "ts-node-dev --files src/server.ts",
     "test": "jest --runInBand",
-    "build": "tsc"
+    "build": "tsc",
+    "start": "node dist/server.js"
   },
   "keywords": [],
   "author": "",
